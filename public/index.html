@@ -3,88 +3,745 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Yekola - École virtuelle offline-first</title>
-  <meta name="description" content="Yekola partout. Même sans Internet. École virtuelle pour la formation professionnelle en zones à faible connectivité." />
+  <title>Yekola | École virtuelle offline-first pour la formation pro</title>
+  <meta name="description" content="Yekola partout. Même sans Internet. École virtuelle SaaS multi-tenant : parcours, DT, TP, Meet, sync offline et Mobile Money pour centres et ONG." />
   <link rel="icon" href="/brand/yekola-logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/brand/tokens.css" />
   <style>
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
-      margin: 0;
-      min-height: 100vh;
       font-family: var(--yk-font-body);
       color: var(--yk-paper);
       background: var(--yk-black);
-      background-image: var(--yk-grad-hero);
-    }
-    main {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2.5rem 1.25rem 3rem;
-      text-align: center;
-    }
-    img.logo {
-      width: min(280px, 72vw);
-      height: auto;
-      margin-bottom: 1.25rem;
-    }
-    h1 {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip: rect(0 0 0 0);
-    }
-    .tag {
-      font-family: var(--yk-font-display);
-      font-size: clamp(1rem, 2.5vw, 1.2rem);
-      font-weight: 600;
-      color: var(--yk-mint);
-      letter-spacing: 0.02em;
-      margin: 0 0 0.75rem;
-    }
-    p.lead {
-      max-width: 36rem;
-      margin: 0 auto 1.75rem;
       line-height: 1.55;
-      color: #c5d6cb;
+    }
+    a { color: inherit; }
+    .wrap { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--yk-amber);
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-family: var(--yk-font-display);
+      font-size: clamp(1.6rem, 3.2vw, 2.35rem);
+      line-height: 1.15;
+      font-weight: 700;
+      max-width: 18ch;
+    }
+    .section-lead {
+      margin-top: 0.9rem;
+      color: #b7c9be;
+      max-width: 42rem;
       font-size: 1.05rem;
     }
-    .cta {
-      display: inline-block;
-      padding: 0.85rem 1.4rem;
-      border-radius: 10px;
-      background: var(--yk-amber);
-      color: #1a1205;
-      font-weight: 700;
-      text-decoration: none;
-      font-family: var(--yk-font-display);
+
+    /* Nav */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(14px);
+      background: rgba(5, 8, 7, 0.82);
+      border-bottom: 1px solid rgba(61, 190, 110, 0.12);
     }
-    .cta:hover { filter: brightness(1.06); }
-    footer {
-      margin-top: 2.5rem;
-      font-size: 0.85rem;
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem 0;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      text-decoration: none;
+    }
+    .nav-brand img { height: 36px; width: auto; }
+    .nav-brand span {
+      font-family: var(--yk-font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      background: var(--yk-grad-mark);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .nav-links {
+      display: none;
+      gap: 1.35rem;
+      list-style: none;
+      font-size: 0.92rem;
+      color: #c5d6cb;
+    }
+    .nav-links a { text-decoration: none; }
+    .nav-links a:hover { color: var(--yk-mint); }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.78rem 1.2rem;
+      border-radius: 10px;
+      font-family: var(--yk-font-display);
+      font-weight: 700;
+      font-size: 0.92rem;
+      text-decoration: none;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .btn-amber { background: var(--yk-amber); color: #1a1205; }
+    .btn-amber:hover { filter: brightness(1.06); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--yk-paper);
+      border-color: rgba(126, 217, 160, 0.35);
+    }
+    .btn-ghost:hover { border-color: var(--yk-mint); color: var(--yk-mint); }
+
+    /* Hero - Ansella-style: brand + pitch + product panel */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 3.5rem 0 4.5rem;
+      background:
+        radial-gradient(90% 70% at 80% -10%, rgba(61, 190, 110, 0.28), transparent 55%),
+        radial-gradient(60% 50% at 10% 80%, rgba(240, 160, 32, 0.12), transparent 50%),
+        var(--yk-black);
+    }
+    .hero-grid {
+      display: grid;
+      gap: 2.5rem;
+      align-items: center;
+    }
+    @media (min-width: 920px) {
+      .nav-links { display: flex; }
+      .hero-grid { grid-template-columns: 1.05fr 0.95fr; gap: 3rem; }
+    }
+    .hero-logo {
+      width: min(200px, 55vw);
+      height: auto;
+      margin-bottom: 1.1rem;
+    }
+    .hero h1 {
+      font-family: var(--yk-font-display);
+      font-size: clamp(1.85rem, 4.2vw, 3rem);
+      line-height: 1.12;
+      font-weight: 700;
+      max-width: 14ch;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: var(--yk-grad-mark);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero-sub {
+      margin-top: 1rem;
+      color: #c5d6cb;
+      font-size: 1.08rem;
+      max-width: 34rem;
+    }
+    .hero-cta { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.6rem; }
+    .hero-note {
+      margin-top: 1rem;
+      font-size: 0.88rem;
       color: var(--yk-muted);
     }
+
+    .panel {
+      background: linear-gradient(165deg, rgba(20, 92, 69, 0.35), rgba(11, 20, 16, 0.95));
+      border: 1px solid rgba(61, 190, 110, 0.25);
+      border-radius: 18px;
+      padding: 1.15rem;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    }
+    .panel-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .stat {
+      flex: 1;
+      background: rgba(5, 8, 7, 0.55);
+      border-radius: 12px;
+      padding: 0.85rem 0.9rem;
+    }
+    .stat label {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--yk-muted);
+      margin-bottom: 0.35rem;
+    }
+    .stat strong {
+      font-family: var(--yk-font-display);
+      font-size: 1.25rem;
+      color: var(--yk-mint);
+    }
+    .course-card {
+      background: rgba(5, 8, 7, 0.7);
+      border-radius: 14px;
+      padding: 1.1rem 1.15rem;
+      border: 1px solid rgba(126, 217, 160, 0.15);
+    }
+    .course-card .badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #1a1205;
+      background: var(--yk-amber);
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      margin-bottom: 0.65rem;
+    }
+    .course-card h3 {
+      font-family: var(--yk-font-display);
+      font-size: 1.05rem;
+      margin-bottom: 0.45rem;
+    }
+    .course-card p { color: #b7c9be; font-size: 0.9rem; }
+    .meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.65rem;
+      margin-top: 1rem;
+      font-size: 0.82rem;
+      color: #9fb5a8;
+    }
+    .meta span { display: block; color: var(--yk-paper); font-weight: 600; margin-top: 0.15rem; }
+    .sync-bar {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.7rem 0.85rem;
+      border-radius: 10px;
+      background: rgba(61, 190, 110, 0.12);
+      border: 1px solid rgba(61, 190, 110, 0.28);
+      font-size: 0.85rem;
+    }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--yk-lime);
+      box-shadow: 0 0 0 4px rgba(61, 190, 110, 0.2);
+      display: inline-block;
+      margin-right: 0.45rem;
+    }
+
+    /* Sections */
+    section { padding: 4.25rem 0; }
+    .band { background: #07110d; border-block: 1px solid rgba(61, 190, 110, 0.1); }
+    .grid-2 {
+      display: grid;
+      gap: 2rem;
+      align-items: start;
+    }
+    @media (min-width: 860px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; gap: 3rem; }
+    }
+    .pay-list {
+      list-style: none;
+      display: grid;
+      gap: 0.85rem;
+      margin-top: 1.5rem;
+    }
+    .pay-list li {
+      display: flex;
+      gap: 0.85rem;
+      align-items: flex-start;
+      padding: 1rem 1.05rem;
+      border-radius: 12px;
+      background: rgba(20, 92, 69, 0.18);
+      border: 1px solid rgba(61, 190, 110, 0.16);
+    }
+    .pay-list h4 {
+      font-family: var(--yk-font-display);
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    .pay-list p { color: #b7c9be; font-size: 0.92rem; }
+    .icon-pill {
+      flex-shrink: 0;
+      width: 2.4rem; height: 2.4rem;
+      border-radius: 10px;
+      display: grid; place-items: center;
+      background: rgba(240, 160, 32, 0.18);
+      color: var(--yk-amber);
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+
+    .cards {
+      display: grid;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    @media (min-width: 760px) {
+      .cards { grid-template-columns: repeat(3, 1fr); }
+    }
+    .card {
+      padding: 1.35rem 1.25rem;
+      border-radius: 14px;
+      background: rgba(11, 20, 16, 0.9);
+      border: 1px solid rgba(61, 190, 110, 0.18);
+    }
+    .card h3 {
+      font-family: var(--yk-font-display);
+      font-size: 1.08rem;
+      margin: 0.55rem 0 0.45rem;
+    }
+    .card p { color: #b7c9be; font-size: 0.95rem; }
+    .card .num {
+      font-family: var(--yk-font-display);
+      color: var(--yk-amber);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .why-grid {
+      display: grid;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    @media (min-width: 860px) {
+      .why-grid { grid-template-columns: 1.1fr 0.9fr; align-items: center; }
+    }
+    .checks { list-style: none; display: grid; gap: 0.75rem; }
+    .checks li {
+      display: flex;
+      gap: 0.7rem;
+      align-items: flex-start;
+      color: #c5d6cb;
+      font-size: 0.98rem;
+    }
+    .checks li::before {
+      content: "";
+      width: 1.15rem; height: 1.15rem;
+      margin-top: 0.15rem;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background:
+        linear-gradient(var(--yk-lime), var(--yk-lime)) center/0.45rem 0.45rem no-repeat,
+        rgba(61, 190, 110, 0.25);
+    }
+    .wallet {
+      border-radius: 16px;
+      padding: 1.35rem;
+      background: linear-gradient(160deg, #145c45, #0b1410);
+      border: 1px solid rgba(240, 160, 32, 0.25);
+    }
+    .wallet .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #9fb5a8; }
+    .wallet .balance {
+      font-family: var(--yk-font-display);
+      font-size: 2rem;
+      margin: 0.35rem 0 1rem;
+      color: var(--yk-gold);
+    }
+    .tx {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem 0;
+      border-top: 1px solid rgba(126, 217, 160, 0.15);
+      font-size: 0.9rem;
+    }
+    .tx small { display: block; color: #9fb5a8; margin-top: 0.2rem; }
+
+    .features {
+      display: grid;
+      gap: 0.85rem;
+      margin-top: 2rem;
+    }
+    @media (min-width: 700px) {
+      .features { grid-template-columns: 1fr 1fr; }
+    }
+    .feat {
+      display: flex;
+      gap: 0.85rem;
+      padding: 1rem 1.05rem;
+      border-radius: 12px;
+      border: 1px solid rgba(61, 190, 110, 0.14);
+      background: rgba(7, 17, 13, 0.8);
+    }
+    .feat strong {
+      display: block;
+      font-family: var(--yk-font-display);
+      margin-bottom: 0.2rem;
+    }
+    .feat span { color: #b7c9be; font-size: 0.9rem; }
+
+    /* Pricing - Ansella-like */
+    .pricing {
+      display: grid;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    @media (min-width: 900px) {
+      .pricing { grid-template-columns: repeat(3, 1fr); }
+    }
+    .plan {
+      border-radius: 16px;
+      padding: 1.4rem 1.25rem 1.35rem;
+      background: #0b1410;
+      border: 1px solid rgba(61, 190, 110, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .plan.featured {
+      border-color: var(--yk-amber);
+      background: linear-gradient(180deg, rgba(240, 160, 32, 0.12), #0b1410 40%);
+    }
+    .plan h3 {
+      font-family: var(--yk-font-display);
+      font-size: 1.2rem;
+    }
+    .plan .price {
+      font-family: var(--yk-font-display);
+      font-size: 1.85rem;
+      color: var(--yk-mint);
+    }
+    .plan .price small {
+      font-size: 0.85rem;
+      color: var(--yk-muted);
+      font-weight: 500;
+    }
+    .plan p { color: #b7c9be; font-size: 0.92rem; }
+    .plan ul {
+      list-style: none;
+      display: grid;
+      gap: 0.55rem;
+      font-size: 0.9rem;
+      color: #c5d6cb;
+      flex: 1;
+    }
+    .plan ul li::before { content: "✓ "; color: var(--yk-lime); font-weight: 700; }
+    .plan .btn { width: 100%; margin-top: 0.5rem; }
+
+    /* FAQ */
+    .faq { display: grid; gap: 0.75rem; margin-top: 1.75rem; max-width: 48rem; }
+    details {
+      border-radius: 12px;
+      border: 1px solid rgba(61, 190, 110, 0.16);
+      background: #0b1410;
+      padding: 1rem 1.1rem;
+    }
+    summary {
+      cursor: pointer;
+      font-family: var(--yk-font-display);
+      font-weight: 600;
+      list-style: none;
+    }
+    summary::-webkit-details-marker { display: none; }
+    details[open] summary { color: var(--yk-mint); margin-bottom: 0.55rem; }
+    details p { color: #b7c9be; font-size: 0.95rem; }
+
+    /* Footer */
+    footer.site {
+      padding: 2.5rem 0 2rem;
+      border-top: 1px solid rgba(61, 190, 110, 0.12);
+      color: var(--yk-muted);
+      font-size: 0.9rem;
+    }
+    .foot-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .foot-grid a { color: var(--yk-mint); text-decoration: none; }
   </style>
 </head>
 <body>
-  <main>
-    <img class="logo" src="/brand/yekola-logo.png" alt="Yekola" />
-    <h1>Yekola</h1>
-    <p class="tag">Yekola partout. Même sans Internet.</p>
-    <p class="lead">
-      École virtuelle SaaS multi-tenant pour la formation professionnelle
-      en zones rurales et à faible connectivité - parcours, DT, TP, Meet, sync offline.
-    </p>
-    <a class="cta" href="mailto:hi@mcbuleli.org?subject=Yekola%20pilot">Demander un pilot</a>
-    <footer>yekola.mcbuleli.com · McBuleli</footer>
-  </main>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="nav-brand" href="/">
+        <img src="/brand/yekola-logo.png" alt="" />
+        <span>Yekola</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#avantage">Avantage</a></li>
+        <li><a href="#valeur">Valeur</a></li>
+        <li><a href="#fonctionnalites">Fonctions</a></li>
+        <li><a href="#tarifs">Tarifs</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+      <a class="btn btn-amber" href="mailto:hi@mcbuleli.org?subject=Yekola%20pilot">Démarrer un pilot</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <img class="hero-logo" src="/brand/yekola-logo.png" alt="Yekola" />
+        <p class="eyebrow">École virtuelle · SaaS multi-tenant · Afrique</p>
+        <h1>Gérez votre <em>école</em> même sans Internet</h1>
+        <p class="hero-sub">
+          Yekola héberge parcours, DT, TP, quiz, chat et Meet pour centres de formation et ONG.
+          Packs téléchargeables, suivi hors-ligne, sync dès qu'il y a une barre - et Mobile Money pour les abonnements.
+        </p>
+        <div class="hero-cta">
+          <a class="btn btn-amber" href="mailto:hi@mcbuleli.org?subject=Yekola%20pilot">Créer mon centre</a>
+          <a class="btn btn-ghost" href="#tarifs">Voir les plans</a>
+        </div>
+        <p class="hero-note">Yekola partout. Même sans Internet.</p>
+      </div>
+
+      <aside class="panel" aria-label="Aperçu produit">
+        <div class="panel-top">
+          <div class="stat">
+            <label>Packs offline</label>
+            <strong>Prêts</strong>
+          </div>
+          <div class="stat">
+            <label>Apprenants sync</label>
+            <strong>128</strong>
+          </div>
+        </div>
+        <div class="course-card">
+          <span class="badge">Certificat inclus</span>
+          <h3>Parcours : Entrepreneuriat rural</h3>
+          <p>6 modules · DT · TP terrain · quiz · Meet audio-first</p>
+          <div class="meta">
+            <div>Début<span>Lun. 06 oct.</span></div>
+            <div>Mode<span>Offline + sync</span></div>
+            <div>Formateur<span>Centre TVET Goma</span></div>
+            <div>Paiement<span>Airtel / Orange</span></div>
+          </div>
+          <div class="sync-bar">
+            <span><i class="dot"></i>Hors-ligne OK · 42 Mo</span>
+            <span>Sync en attente</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="band" id="avantage">
+    <div class="wrap grid-2">
+      <div>
+        <p class="eyebrow">L'avantage Yekola</p>
+        <h2 class="section-title">Pas un shop de PDF. Une vraie école, pensée Afrique.</h2>
+        <p class="section-lead">
+          Comme les LMS qui encaissent en Mobile Money, Yekola parle le langage local des paiements.
+          La différence : on construit d'abord la continuité pédagogique là où le réseau tombe - zones rurales et contextes de crise.
+        </p>
+      </div>
+      <ul class="pay-list">
+        <li>
+          <div class="icon-pill">OF</div>
+          <div>
+            <h4>Offline-first natif</h4>
+            <p>Packs de parcours (cours, audio, quiz). Progress, DT et TP en file d'attente jusqu'au retour réseau.</p>
+          </div>
+        </li>
+        <li>
+          <div class="icon-pill">MM</div>
+          <div>
+            <h4>Mobile Money pour centres</h4>
+            <p>Abonnements école / ONG via Airtel, Orange, M-Pesa. Pas besoin de carte internationale pour démarrer.</p>
+          </div>
+        </li>
+        <li>
+          <div class="icon-pill">MT</div>
+          <div>
+            <h4>Multi-tenant SaaS</h4>
+            <p>Chaque centre a son espace, ses classes, ses formateurs et son branding - sans installer Moodle.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="valeur">
+    <div class="wrap">
+      <p class="eyebrow">Proposition de valeur</p>
+      <h2 class="section-title">Ce que Yekola donne à votre centre</h2>
+      <p class="section-lead">
+        Inspiré des plateformes qui monétisent la formation en Afrique - recentré sur la pédagogie structurée, pas la vente de fichiers.
+      </p>
+      <div class="cards">
+        <article class="card">
+          <div class="num">01</div>
+          <h3>Parcours structurés</h3>
+          <p>Modules, séances, DT, TP et exercices ordonnés. L'apprenant avance dans une école, pas une liste de téléchargements.</p>
+        </article>
+        <article class="card">
+          <div class="num">02</div>
+          <h3>Classe vivante</h3>
+          <p>Chat de cohorte, présence, Meet audio-first (McBuleli Live) quand le réseau revient. Le formateur voit qui est bloqué.</p>
+        </article>
+        <article class="card">
+          <div class="num">03</div>
+          <h3>Preuves & certificats</h3>
+          <p>Quiz, TP terrain et attestations vérifiables en fin de parcours - employables hors de la salle.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="fonctionnalites">
+    <div class="wrap why-grid">
+      <div>
+        <p class="eyebrow">Pourquoi Yekola</p>
+        <h2 class="section-title">Tout pour faire tourner une école virtuelle</h2>
+        <ul class="checks" style="margin-top:1.5rem">
+          <li>Aucune usine Moodle à administrer pour démarrer un centre</li>
+          <li>Packs hors-ligne mesurés en Mo, audio-first pour économiser la data</li>
+          <li>DT / TP avec sync différée des soumissions</li>
+          <li>Meet intégré low-bandwidth, pas un Zoom qui plante à 2G</li>
+          <li>Tableau de bord formateur : progression live + après sync</li>
+          <li>Pilot gratuit 90 jours pour valider sur le terrain</li>
+        </ul>
+      </div>
+      <aside class="wallet" aria-label="Aperçu abonnement">
+        <div class="label">Espace centre · Solde abonnement</div>
+        <div class="balance">$99 / mois</div>
+        <div class="tx">
+          <div>Plan École · 300 apprenants<small>Orange Money · Kinshasa</small></div>
+          <strong style="color:var(--yk-mint)">Payé</strong>
+        </div>
+        <div class="tx">
+          <div>Pack « Électricité basique »<small>Téléchargé · 38 Mo · offline</small></div>
+          <strong style="color:var(--yk-amber)">Actif</strong>
+        </div>
+      </aside>
+    </div>
+
+    <div class="wrap">
+      <div class="features">
+        <div class="feat">
+          <div class="icon-pill">P</div>
+          <div><strong>Parcours & modules</strong><span>Séquence pédagogique claire, pas un dump de PDF.</span></div>
+        </div>
+        <div class="feat">
+          <div class="icon-pill">Q</div>
+          <div><strong>Quiz & exercices</strong><span>Validation locale, notes synchronisées au reconnect.</span></div>
+        </div>
+        <div class="feat">
+          <div class="icon-pill">T</div>
+          <div><strong>DT & TP</strong><span>Devoirs dirigés et preuves pratiques (texte / photo).</span></div>
+        </div>
+        <div class="feat">
+          <div class="icon-pill">M</div>
+          <div><strong>Meet & chat</strong><span>Classe async + live audio quand c'est possible.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tarifs">
+    <div class="wrap">
+      <p class="eyebrow">Plans</p>
+      <h2 class="section-title">Tarification centre / ONG</h2>
+      <p class="section-lead">
+        Modèle SaaS multi-tenant : c'est l'institution qui s'abonne. Grille indicative - finalisée au pilot.
+      </p>
+      <div class="pricing">
+        <article class="plan">
+          <h3>Pilot</h3>
+          <div class="price">$0 <small>/ 90 jours</small></div>
+          <p>Valider Yekola sur un petit groupe.</p>
+          <ul>
+            <li>1 tenant · ≤50 apprenants</li>
+            <li>Packs offline + quiz + chat</li>
+            <li>Puis ~$29 / mois</li>
+            <li>Support communauté</li>
+          </ul>
+          <a class="btn btn-ghost" href="mailto:hi@mcbuleli.org?subject=Yekola%20Pilot">Démarrer Pilot</a>
+        </article>
+        <article class="plan featured">
+          <h3>École</h3>
+          <div class="price">$99–149 <small>/ mois</small></div>
+          <p>Centre TVET ou formation pro en croissance.</p>
+          <ul>
+            <li>≤300 apprenants</li>
+            <li>Meet + DT/TP + badges</li>
+            <li>Dashboard formateur</li>
+            <li>Paiement Mobile Money</li>
+          </ul>
+          <a class="btn btn-amber" href="mailto:hi@mcbuleli.org?subject=Yekola%20Ecole">Choisir École</a>
+        </article>
+        <article class="plan">
+          <h3>Réseau</h3>
+          <div class="price">$399+ <small>/ mois</small></div>
+          <p>ONG multi-sites, province, bailleur.</p>
+          <ul>
+            <li>Multi-tenant + reporting</li>
+            <li>Hub sync USB / Wi-Fi local</li>
+            <li>Accompagnement projet</li>
+            <li>WhatsApp dédié</li>
+          </ul>
+          <a class="btn btn-ghost" href="mailto:hi@mcbuleli.org?subject=Yekola%20Reseau">Parler au projet</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="faq">
+    <div class="wrap">
+      <p class="eyebrow">FAQ</p>
+      <h2 class="section-title">Questions fréquentes</h2>
+      <div class="faq">
+        <details open>
+          <summary>Yekola, c'est comme Ansella ?</summary>
+          <p>
+            Ansella aide les formateurs à vendre des cours en ligne avec Mobile Money.
+            Yekola cible les centres et ONG qui ont besoin d'une école virtuelle offline-first
+            (parcours, DT, TP, Meet, sync) - pas seulement d'une boutique de formations.
+          </p>
+        </details>
+        <details>
+          <summary>Faut-il Internet en permanence ?</summary>
+          <p>
+            Non. On télécharge le pack de parcours (idéalement sur Wi-Fi / cyber / école),
+            on étudie hors-ligne, puis la progression et les devoirs se synchronisent au retour du réseau.
+          </p>
+        </details>
+        <details>
+          <summary>Comment paie mon centre ?</summary>
+          <p>
+            Abonnement SaaS via Mobile Money (Airtel, Orange, M-Pesa, etc.) ou virement projet.
+            Les apprenants n'ont pas besoin de carte Visa pour que l'école tourne.
+          </p>
+        </details>
+        <details>
+          <summary>C'est un simple téléchargement de PDF ?</summary>
+          <p>
+            Non. L'unité est le parcours d'enseignement : séances, exercices, DT, TP, chat et Meet.
+            Les médias hors-ligne sont un moyen, pas le produit.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site">
+    <div class="wrap foot-grid">
+      <div>
+        <strong style="color:var(--yk-paper)">Yekola</strong>
+        · yekola.mcbuleli.com · McBuleli
+      </div>
+      <div>
+        <a href="mailto:hi@mcbuleli.org">hi@mcbuleli.org</a>
+        · RDC
+      </div>
+    </div>
+  </footer>
 </body>
 </html>
