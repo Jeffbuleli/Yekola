@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yekola - École virtuelle offline-first</title>
+  <meta name="description" content="Yekola partout. Même sans Internet. École virtuelle pour la formation professionnelle en zones à faible connectivité." />
+  <link rel="icon" href="/brand/yekola-logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/brand/tokens.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--yk-font-body);
+      color: var(--yk-paper);
+      background: var(--yk-black);
+      background-image: var(--yk-grad-hero);
+    }
+    main {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 1.25rem 3rem;
+      text-align: center;
+    }
+    img.logo {
+      width: min(280px, 72vw);
+      height: auto;
+      margin-bottom: 1.25rem;
+    }
+    h1 {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+    .tag {
+      font-family: var(--yk-font-display);
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      font-weight: 600;
+      color: var(--yk-mint);
+      letter-spacing: 0.02em;
+      margin: 0 0 0.75rem;
+    }
+    p.lead {
+      max-width: 36rem;
+      margin: 0 auto 1.75rem;
+      line-height: 1.55;
+      color: #c5d6cb;
+      font-size: 1.05rem;
+    }
+    .cta {
+      display: inline-block;
+      padding: 0.85rem 1.4rem;
+      border-radius: 10px;
+      background: var(--yk-amber);
+      color: #1a1205;
+      font-weight: 700;
+      text-decoration: none;
+      font-family: var(--yk-font-display);
+    }
+    .cta:hover { filter: brightness(1.06); }
+    footer {
+      margin-top: 2.5rem;
+      font-size: 0.85rem;
+      color: var(--yk-muted);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <img class="logo" src="/brand/yekola-logo.png" alt="Yekola" />
+    <h1>Yekola</h1>
+    <p class="tag">Yekola partout. Même sans Internet.</p>
+    <p class="lead">
+      École virtuelle SaaS multi-tenant pour la formation professionnelle
+      en zones rurales et à faible connectivité - parcours, DT, TP, Meet, sync offline.
+    </p>
+    <a class="cta" href="mailto:hi@mcbuleli.org?subject=Yekola%20pilot">Demander un pilot</a>
+    <footer>yekola.mcbuleli.com · McBuleli</footer>
+  </main>
+</body>
+</html>
