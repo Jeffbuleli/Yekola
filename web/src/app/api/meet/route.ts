@@ -27,10 +27,29 @@ export async function GET(req: Request) {
   }
 
   const url = courseMeetUrl(courseId, academy?.slug);
+  const now = Date.now();
+  const sessions = (course.liveSessions || [])
+    .map((s) => ({
+      id: s.id,
+      title: s.title,
+      startsAt: s.startsAt,
+      durationMin: s.durationMin,
+      meetUrl: s.meetUrl || url,
+      liveRequired: course.liveRequired,
+    }))
+    .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+
+  const upcoming = sessions.find((s) => new Date(s.startsAt).getTime() >= now - 30 * 60_000);
+  const joinUrl = upcoming?.meetUrl || url;
+
   return NextResponse.json({
-    url,
+    url: joinUrl,
+    roomUrl: url,
     role: isOwner ? "host" : "learner",
     courseTitle: course.title,
+    liveRequired: course.liveRequired,
+    sessions,
+    nextSession: upcoming || null,
     hint: "Audio recommandé - démarrez sans caméra pour économiser la data.",
   });
 }

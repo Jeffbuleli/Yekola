@@ -25,10 +25,13 @@ export type PawapayStatusResponse = {
 };
 
 function getBaseUrl() {
-  return (
-    process.env.PAWAPAY_API_BASE_URL?.replace(/\/+$/, "") ||
-    "https://api.pawapay.io"
-  );
+  const override = process.env.PAWAPAY_API_BASE_URL?.trim();
+  if (override) return override.replace(/\/+$/, "");
+  const env = process.env.PAWAPAY_ENV?.trim().toLowerCase();
+  if (env === "sandbox" || env === "test") {
+    return "https://api.sandbox.pawapay.io";
+  }
+  return "https://api.pawapay.io";
 }
 
 function getToken() {

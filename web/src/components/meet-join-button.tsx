@@ -32,7 +32,7 @@ export function MeetJoinButton({ courseId }: { courseId: string }) {
         onClick={join}
         className="yk-btn yk-btn-ghost"
       >
-        {busy ? "…" : "Rejoindre la séance audio"}
+        {busy ? "…" : "Rejoindre le live (audio)"}
       </button>
       {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
     </div>
