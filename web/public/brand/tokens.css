@@ -1,0 +1,21 @@
+/* Yekola brand tokens - from logo (green gradient + amber accent) */
+:root {
+  --yk-black: #050807;
+  --yk-ink: #0b1410;
+  --yk-forest: #0d3d2e;
+  --yk-teal: #145c45;
+  --yk-green: #1f8f5f;
+  --yk-lime: #3dbe6e;
+  --yk-mint: #7ed9a0;
+  --yk-amber: #f0a020;
+  --yk-gold: #f5c14a;
+  --yk-paper: #f4f7f5;
+  --yk-muted: #6b7f74;
+  --yk-line: #d5e0d9;
+
+  --yk-grad-mark: linear-gradient(115deg, #0d3d2e 0%, #1a7a52 48%, #3dbe6e 100%);
+  --yk-grad-hero: radial-gradient(120% 80% at 70% 0%, #145c45 0%, #050807 55%);
+
+  --yk-font-display: "Sora", "Space Grotesk", system-ui, sans-serif;
+  --yk-font-body: "Manrope", "IBM Plex Sans", system-ui, sans-serif;
+}

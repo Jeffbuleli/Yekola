@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+:root {
+  --yk-black: #050807;
+  --yk-ink: #0b1410;
+  --yk-forest: #0d3d2e;
+  --yk-teal: #145c45;
+  --yk-green: #1f8f5f;
+  --yk-lime: #3dbe6e;
+  --yk-mint: #7ed9a0;
+  --yk-amber: #f0a020;
+  --yk-gold: #f5c14a;
+  --yk-paper: #f4f7f5;
+  --yk-muted: #6b7f74;
+  --yk-line: #d5e0d9;
+  --background: #f4f7f5;
+  --foreground: #0b1410;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.yk-card {
+  background: white;
+  border: 1px solid var(--yk-line);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+}
+
+.yk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.75rem 1.15rem;
+  border-radius: 0.65rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+
+.yk-btn-primary {
+  background: var(--yk-amber);
+  color: #1a1205;
+}
+
+.yk-btn-secondary {
+  background: var(--yk-forest);
+  color: white;
+}
+
+.yk-btn-ghost {
+  background: transparent;
+  border-color: var(--yk-line);
+  color: var(--yk-forest);
+}
