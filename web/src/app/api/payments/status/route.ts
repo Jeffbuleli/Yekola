@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getDb, mutateDb } from "@/lib/db/store";
 import { fulfillPaymentIntent, markPaymentFailed } from "@/lib/payments/fulfill";
+import { humanizePaymentMessage } from "@/lib/payments/messages";
 import {
   mapPawapayStatus,
   pawapayCheckDeposit,
@@ -37,14 +38,18 @@ export async function GET(req: Request) {
     } else if (mapped === "FAILED") {
       markPaymentFailed(
         reference,
-        body?.failureReason?.failureMessage || "Paiement échoué",
+        humanizePaymentMessage(
+          body?.failureReason?.failureMessage || body?.failureReason,
+          "failed",
+        ),
       );
       intent = getDb().payments.find((p) => p.reference === reference)!;
     } else {
       mutateDb((d) => {
         const p = d.payments.find((x) => x.reference === reference);
         if (p) {
-          p.message = `En cours (${body?.status || "PROCESSING"})`;
+          const st = String(body?.status || "PROCESSING");
+          p.message = humanizePaymentMessage(null, st);
           p.updatedAt = new Date().toISOString();
         }
       });

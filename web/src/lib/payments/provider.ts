@@ -6,6 +6,7 @@ import {
 } from "./pawapay-client";
 import { detectMomoProvider } from "./momo-providers";
 import { isValidCodMsisdn, normalizeCodPhone } from "./phone";
+import { humanizePaymentMessage } from "./messages";
 
 export type PaymentResult = {
   status: "demo" | "pending" | "paid" | "failed";
@@ -126,9 +127,11 @@ export const MomoPaymentProvider: PaymentProvider = {
           return {
             status: "failed",
             reference,
-            message:
+            message: humanizePaymentMessage(
               response.failureReason?.failureMessage ||
-              `Retrait refusé (${response.status})`,
+                `Retrait refusé (${response.status})`,
+              "failed",
+            ),
             provider: "momo",
             msisdn,
             momoProvider,
@@ -156,9 +159,11 @@ export const MomoPaymentProvider: PaymentProvider = {
         return {
           status: "failed",
           reference,
-          message:
+          message: humanizePaymentMessage(
             response.failureReason?.failureMessage ||
-            `Paiement refusé (${response.status})`,
+              `Paiement refusé (${response.status})`,
+            "failed",
+          ),
           provider: "momo",
           msisdn,
           momoProvider,
@@ -177,7 +182,10 @@ export const MomoPaymentProvider: PaymentProvider = {
       return {
         status: "failed",
         reference,
-        message: err instanceof Error ? err.message : "Erreur Mobile Money",
+        message: humanizePaymentMessage(
+          err instanceof Error ? err.message : "Erreur Mobile Money",
+          "failed",
+        ),
         provider: "momo",
         msisdn,
         momoProvider,

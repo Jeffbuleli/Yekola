@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { formatFc } from "@/lib/plans";
 import { MOMO_OPTIONS } from "@/lib/payments/momo-providers";
+import { humanizePaymentMessage } from "@/lib/payments/messages";
 import { PaymentPendingPanel } from "@/components/payment-pending-panel";
 
 export function BuyCourseButton({
@@ -36,15 +37,27 @@ export function BuyCourseButton({
       });
       const data = await res.json();
       if (!res.ok) {
-        setMsg(data.message || data.error || "Achat impossible");
+        setMsg(
+          humanizePaymentMessage(
+            data.message || data.error || data.pay?.message,
+            "failed",
+          ),
+        );
         return;
       }
       if (data.pending && data.reference) {
         setPendingRef(data.reference);
-        setMsg(data.payment?.message || "Confirmez sur votre téléphone");
+        setMsg(
+          humanizePaymentMessage(
+            data.payment?.message,
+            data.payment?.status || "pending",
+          ),
+        );
         return;
       }
-      setMsg(data.payment?.message || "Achat réussi");
+      setMsg(
+        humanizePaymentMessage(data.payment?.message, data.payment?.status || "paid"),
+      );
       router.push(`/learn/${courseId}`);
       router.refresh();
     } catch {

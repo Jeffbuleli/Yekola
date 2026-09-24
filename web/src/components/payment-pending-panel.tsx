@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  humanizePaymentMessage,
+  paymentStatusLabel,
+} from "@/lib/payments/messages";
 
 export function PaymentPendingPanel({
   reference,
@@ -28,15 +32,19 @@ export function PaymentPendingPanel({
         const res = await fetch(
           `/api/payments/status?ref=${encodeURIComponent(reference)}`,
         );
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         if (cancelled) return;
         if (!res.ok) {
-          setMessage(data.error || "Erreur de vérification");
+          setMessage(
+            humanizePaymentMessage(data.message || data.error, "failed"),
+          );
           return;
         }
-        setStatus(data.payment?.status || "pending");
-        setMessage(data.payment?.message || message);
+        const st = String(data.payment?.status || "pending");
+        setStatus(st);
+        setMessage(humanizePaymentMessage(data.payment?.message, st));
         if (data.paid) {
+          setMessage("Paiement confirmé.");
           onPaid?.();
           if (redirectTo) {
             router.push(redirectTo);
@@ -44,12 +52,16 @@ export function PaymentPendingPanel({
           }
           return;
         }
-        if (data.payment?.status === "failed") return;
+        if (st === "failed") return;
       } catch {
-        if (!cancelled) setMessage("Réseau instable - nouvelle tentative…");
+        if (!cancelled) setMessage("Réseau instable — nouvelle tentative…");
       }
       if (!cancelled && tries < 60) {
         setTimeout(poll, 3000);
+      } else if (!cancelled && tries >= 60) {
+        setMessage(
+          "Toujours en attente. Si vous avez confirmé sur MoMo, rafraîchissez la page.",
+        );
       }
     }
 
@@ -65,11 +77,13 @@ export function PaymentPendingPanel({
       <p className="font-display font-bold text-[var(--yk-forest)]">
         Paiement Mobile Money
       </p>
-      <p className="text-sm text-[var(--yk-muted)]">{message}</p>
+      <p className="text-sm text-[var(--yk-forest)]">{message}</p>
       <p className="text-xs text-[var(--yk-muted)]">
-        Réf. <code>{reference}</code> · statut : <strong>{status}</strong>
+        Réf. <code className="break-all">{reference}</code>
+        {" · "}
+        <strong>{paymentStatusLabel(status)}</strong>
       </p>
-      {status === "pending" && (
+      {(status === "pending" || status === "processing") && (
         <p className="text-xs text-amber-800">
           Ouvrez votre app MoMo et confirmez. Cette page se met à jour
           automatiquement.

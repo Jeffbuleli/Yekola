@@ -7,6 +7,7 @@ import type { Plan } from "@/lib/plans";
 import { formatFc } from "@/lib/plans";
 import { MOMO_OPTIONS } from "@/lib/payments/momo-providers";
 import { PaymentPendingPanel } from "@/components/payment-pending-panel";
+import { humanizePaymentMessage } from "@/lib/payments/messages";
 import { IconCheck } from "@/components/icons";
 
 function BillingInner() {
@@ -48,16 +49,16 @@ function BillingInner() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setMsg(data.message || data.error || "Échec");
+        setMsg(humanizePaymentMessage(data.message || data.error, "failed"));
         return;
       }
       if (data.pending && data.reference) {
         setPendingRef(data.reference);
-        setMsg(data.payment?.message || "Confirmez sur votre téléphone");
+        setMsg(humanizePaymentMessage(data.payment?.message, "pending"));
         return;
       }
       setCurrent(planId);
-      setMsg(data.payment?.message || "Abonnement activé");
+      setMsg(humanizePaymentMessage(data.payment?.message, "paid"));
     } finally {
       setBusy(false);
     }
