@@ -1,19 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Sora } from "next/font/google";
 import "./globals.css";
 import { ConnectivityBar } from "@/components/connectivity-bar";
 import { RegisterSW } from "@/components/register-sw";
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
-});
-
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--font-sora",
-  weight: ["600", "700"],
-});
 
 export const metadata: Metadata = {
   title: "Yekola - Apprendre. Pratiquer. Prouver.",
@@ -32,7 +20,15 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <body className={`${manrope.variable} ${sora.variable} antialiased`}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="antialiased" style={{ fontFamily: "Manrope, system-ui, sans-serif" }}>
         <ConnectivityBar />
         <RegisterSW />
         {children}
