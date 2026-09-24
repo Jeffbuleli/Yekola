@@ -6,8 +6,6 @@ import { FORCE_KEY, listPending, syncNow } from "@/lib/sync/sync-manager";
 /** Sync auto au montage, au retour réseau, et périodiquement. */
 export function SyncWatcher() {
   useEffect(() => {
-    let timer: ReturnType<typeof setInterval> | undefined;
-
     async function flush() {
       if (typeof localStorage !== "undefined" && localStorage.getItem(FORCE_KEY) === "1") {
         return;
@@ -25,12 +23,12 @@ export function SyncWatcher() {
     void flush();
     window.addEventListener("online", flush);
     window.addEventListener("focus", flush);
-    timer = setInterval(() => void flush(), 20_000);
+    const timer = setInterval(() => void flush(), 20_000);
 
     return () => {
       window.removeEventListener("online", flush);
       window.removeEventListener("focus", flush);
-      if (timer) clearInterval(timer);
+      clearInterval(timer);
     };
   }, []);
   return null;
