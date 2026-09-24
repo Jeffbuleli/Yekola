@@ -61,7 +61,11 @@ export type Course = {
   /** Prix du cours en francs congolais. */
   priceCdf: number;
   currency: "CDF";
-  status: "draft" | "published";
+  status: "draft" | "pending_review" | "published" | "rejected";
+  /** Motif de refus admin (si rejected). */
+  reviewNote: string | null;
+  reviewedAt: string | null;
+  reviewedBy: string | null;
   modules: CourseModule[];
   /** Clé d'icône SVG : code | wallet | store | book */
   coverIcon: string;

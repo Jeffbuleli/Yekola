@@ -43,6 +43,36 @@ export async function POST(req: Request) {
   const academy = db.academies.find((a) => a.id === course.academyId);
   if (!academy) return NextResponse.json({ error: "academy_missing" }, { status: 400 });
 
+  // Enseignant : pas d'achat de ses propres cours (même académie)
+  if (user.academyId && user.academyId === course.academyId) {
+    return NextResponse.json(
+      {
+        error: "own_course",
+        message: "Vous ne pouvez pas acheter un cours de votre propre académie.",
+      },
+      { status: 403 },
+    );
+  }
+  if (user.id === academy.ownerId) {
+    return NextResponse.json(
+      {
+        error: "own_course",
+        message: "Vous ne pouvez pas acheter un cours de votre propre académie.",
+      },
+      { status: 403 },
+    );
+  }
+  // Admin : consultation / modération uniquement
+  if (user.role === "admin") {
+    return NextResponse.json(
+      {
+        error: "admin_no_purchase",
+        message: "Le compte admin valide le contenu ; il n’achète pas de cours.",
+      },
+      { status: 403 },
+    );
+  }
+
   // Free course → instant
   if (course.priceCdf <= 0) {
     const pay = await getPaymentProvider().initiate({

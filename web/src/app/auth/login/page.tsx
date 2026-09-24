@@ -27,7 +27,8 @@ function LoginForm() {
         setError("Email ou mot de passe incorrect.");
         return;
       }
-      router.push(data.user.role === "teacher" ? "/studio" : "/learn");
+      const role = data.user.role as string;
+      router.push(role === "admin" ? "/admin" : role === "teacher" ? "/studio" : "/learn");
       router.refresh();
     } catch {
       setError("Erreur réseau.");
@@ -40,8 +41,9 @@ function LoginForm() {
     <form onSubmit={onSubmit} className="yk-card mx-auto max-w-md space-y-4">
       <h1 className="font-display text-2xl font-bold text-[var(--yk-forest)]">Connexion</h1>
       <p className="text-sm text-[var(--yk-muted)]">
-        Démo : jeff@yekola.demo ou patty@yekola.demo · mot de passe{" "}
-        <code>yekola2026</code>
+        Démo · mot de passe <code>yekola2026</code>
+        <br />
+        Apprenant : dan@yekola.demo · Enseignant : patty@yekola.demo · Admin : jeff@yekola.demo
       </p>
       <label className="block text-sm font-semibold">
         Email

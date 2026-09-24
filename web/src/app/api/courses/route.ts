@@ -87,7 +87,7 @@ const courseSchema = z.object({
       }),
     )
     .min(1),
-  status: z.enum(["draft", "published"]).optional(),
+  status: z.enum(["draft", "pending_review", "published"]).optional(),
 });
 
 export async function POST(req: Request) {
@@ -105,8 +105,10 @@ export async function POST(req: Request) {
   const academy = db.academies.find((a) => a.id === user.academyId);
   if (!academy) return NextResponse.json({ error: "no_academy" }, { status: 400 });
 
-  const status = parsed.data.status ?? "draft";
-  if (status === "published") {
+  // Enseignant ne publie pas directement : published → pending_review
+  let status = parsed.data.status ?? "draft";
+  if (status === "published") status = "pending_review";
+  if (status === "pending_review") {
     const published = db.courses.filter(
       (c) => c.academyId === academy.id && c.status === "published",
     ).length;
@@ -158,6 +160,9 @@ export async function POST(req: Request) {
     priceCdf: parsed.data.priceCdf,
     currency: "CDF",
     status,
+    reviewNote: null,
+    reviewedAt: null,
+    reviewedBy: null,
     coverIcon: parsed.data.coverIcon || "book",
     modules,
     createdAt: now,
@@ -184,7 +189,9 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  if (body.status === "published" && existing.status !== "published") {
+  let nextStatus = body.status as string | undefined;
+  if (nextStatus === "published") nextStatus = "pending_review";
+  if (nextStatus === "pending_review" && existing.status !== "pending_review") {
     const academy = db.academies.find((a) => a.id === user.academyId)!;
     const published = db.courses.filter(
       (c) => c.academyId === academy.id && c.status === "published",
@@ -200,7 +207,14 @@ export async function PATCH(req: Request) {
     if (typeof body.tagline === "string") c.tagline = body.tagline;
     if (typeof body.description === "string") c.description = body.description;
     if (typeof body.priceCdf === "number") c.priceCdf = body.priceCdf;
-    if (body.status === "draft" || body.status === "published") c.status = body.status;
+    if (nextStatus === "draft" || nextStatus === "pending_review") {
+      c.status = nextStatus;
+      if (nextStatus === "pending_review") {
+        c.reviewNote = null;
+        c.reviewedAt = null;
+        c.reviewedBy = null;
+      }
+    }
     c.updatedAt = new Date().toISOString();
   });
 

@@ -18,8 +18,8 @@ export default function PricingPage() {
           Tarifs enseignants
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-[var(--yk-muted)] sm:text-base">
-          Abonnez-vous pour publier. Vos apprenants paient chaque cours. La commission diminue
-          avec les plans supérieurs.
+          Abonnements pour les enseignants qui publient. Les apprenants n’ont pas besoin
+          d’abonnement : ils achètent chaque cours dans le catalogue.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {PLANS.map((p) => (

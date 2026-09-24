@@ -2,24 +2,25 @@
 
 Date: 2026-09-24
 
-## Comptes démo
+## Comptes démo (mot de passe `yekola2026`)
 
-- Enseignant : `jeff@yekola.demo` / `yekola2026`
-- Apprenant : `patty@yekola.demo` / `yekola2026`
+| Rôle | Compte | Accès |
+|------|--------|--------|
+| Apprenant | `dan@yekola.demo` | Catalogue, Mes cours, achat |
+| Enseignant | `patty@yekola.demo` | Studio, Tarifs, Catalogue (pas d’achat de ses cours) |
+| Admin | `jeff@yekola.demo` | Modération (valider avant publication) |
 
-## Phases livrées
+## Navigation par rôle
 
-0. Landing + narrative SaaS créateurs  
-1. Auth, académie, studio, catalogue, achat (FC)  
-2. Pack hors ligne + sync  
-3. Mobile Money (PawaPay / démo)  
-4. Certificats, analytics, Meet audio, IA opt-in  
+- Visiteur : Catalogue, Tarifs enseignants
+- Apprenant : Catalogue, Mes cours
+- Enseignant : Studio, Tarifs, Catalogue
+- Admin : Modération, Catalogue
 
-## Tarifs enseignants (FC)
+## Phases
 
-| Free | Base | Pro | Max |
-|------|------|-----|-----|
-| 0 | 1 000 | 1 500 | 2 000 |
+0–4 livrées (SaaS, offline, MoMo, certificats, Meet, IA).  
+Validation admin des cours avant public.
 
 ## Deploy
 

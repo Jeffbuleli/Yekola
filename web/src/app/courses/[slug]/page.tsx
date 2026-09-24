@@ -17,12 +17,34 @@ export default async function CoursePage({
   if (!course) notFound();
 
   const user = await getCurrentUser();
+  const isOwner =
+    !!user && user.role === "teacher" && user.academyId === course.academyId;
+  const isAdmin = user?.role === "admin";
+
+  if (course.status !== "published" && !isOwner && !isAdmin) {
+    notFound();
+  }
+
   const enrolled = user ? enrollmentFor(user.id, course.id) : null;
+  const ownAcademy =
+    !!user &&
+    ((user.academyId && user.academyId === course.academyId) ||
+      user.id === course.teacher?.id);
 
   return (
     <div className="min-h-screen bg-[var(--yk-paper)]">
       <SiteHeader />
       <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+        {course.status !== "published" && (
+          <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
+            Aperçu - statut :{" "}
+            {course.status === "pending_review"
+              ? "en validation admin"
+              : course.status === "rejected"
+                ? "refusé"
+                : "brouillon"}
+          </p>
+        )}
         <CourseHead
           coverIcon={course.coverIcon}
           title={course.title}
@@ -37,24 +59,36 @@ export default async function CoursePage({
           <p className="font-display text-3xl font-bold text-[var(--yk-amber)]">
             {formatFc(course.priceCdf)}
           </p>
-          {enrolled ? (
+          {course.status !== "published" ? (
+            <p className="text-sm text-[var(--yk-muted)]">
+              Pas encore à la vente (validation requise).
+            </p>
+          ) : enrolled ? (
             <Link href={`/learn/${course.id}`} className="yk-btn yk-btn-primary w-full sm:w-auto">
               Continuer le cours
             </Link>
+          ) : ownAcademy ? (
+            <p className="rounded-lg border border-[var(--yk-line)] px-3 py-2 text-sm text-[var(--yk-muted)]">
+              Cours de votre académie - non achetable par vous.
+            </p>
+          ) : user?.role === "admin" ? (
+            <p className="text-sm text-[var(--yk-muted)]">Compte admin : pas d’achat.</p>
           ) : user ? (
             <BuyCourseButton courseId={course.id} priceCdf={course.priceCdf} />
           ) : (
             <Link
-              href={`/auth/login?email=patty@yekola.demo`}
+              href={`/auth/login?email=dan@yekola.demo`}
               className="yk-btn yk-btn-primary w-full sm:w-auto"
             >
               Se connecter pour acheter
             </Link>
           )}
         </div>
-        <p className="mt-3 text-sm text-[var(--yk-muted)]">
-          Après achat : accès immédiat + téléchargement du pack hors ligne.
-        </p>
+        {course.status === "published" && !ownAcademy && user?.role !== "admin" && (
+          <p className="mt-3 text-sm text-[var(--yk-muted)]">
+            Après achat : accès immédiat + téléchargement du pack hors ligne.
+          </p>
+        )}
 
         <section className="mt-10">
           <h2 className="font-display text-xl font-bold text-[var(--yk-forest)]">

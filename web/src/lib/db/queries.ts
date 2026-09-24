@@ -81,7 +81,8 @@ export function academyStats(academyId: string) {
   const plan = academy ? getPlan(academy.planId) : null;
   return {
     publishedCourses: courses.filter((c) => c.status === "published").length,
-    draftCourses: courses.filter((c) => c.status === "draft").length,
+    pendingCourses: courses.filter((c) => c.status === "pending_review").length,
+    draftCourses: courses.filter((c) => c.status === "draft" || c.status === "rejected").length,
     sales: enrollments.length,
     revenueCdf: revenue,
     walletBalanceCdf: academy?.walletBalanceCdf ?? 0,

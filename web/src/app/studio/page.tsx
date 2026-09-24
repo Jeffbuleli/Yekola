@@ -10,9 +10,24 @@ import { MeetJoinButton } from "@/components/meet-join-button";
 import { LogoutButton } from "@/components/logout-button";
 import { togglePublishCourse } from "./actions";
 
+function statusLabel(status: string) {
+  if (status === "published") return "Publié";
+  if (status === "pending_review") return "En validation";
+  if (status === "rejected") return "Refusé";
+  return "Brouillon";
+}
+
+function actionLabel(status: string) {
+  if (status === "published") return "Retirer";
+  if (status === "pending_review") return "Annuler envoi";
+  if (status === "rejected") return "Resoumettre";
+  return "Soumettre à validation";
+}
+
 export default async function StudioPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
+  if (user.role === "admin") redirect("/admin");
   if (user.role !== "teacher" || !user.academyId) redirect("/learn");
 
   const db = getDb();
@@ -36,6 +51,9 @@ export default async function StudioPage() {
             </h1>
             <p className="mt-1 text-sm text-[var(--yk-muted)]">
               Plan {stats.plan?.name} · {academy.city} · Bonjour {user.name}
+            </p>
+            <p className="mt-2 max-w-xl text-sm text-[var(--yk-muted)]">
+              Soumettez vos cours à validation. Un admin les rend publics après contrôle du contenu.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
@@ -63,8 +81,8 @@ export default async function StudioPage() {
 
         <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
           {[
-            { l: "Cours publiés", v: stats.publishedCourses },
-            { l: "Brouillons", v: stats.draftCourses },
+            { l: "Publiés", v: stats.publishedCourses },
+            { l: "En validation", v: stats.pendingCourses ?? 0 },
             { l: "Ventes", v: stats.sales },
             { l: "Portefeuille", v: formatFc(stats.walletBalanceCdf) },
           ].map((s) => (
@@ -78,7 +96,9 @@ export default async function StudioPage() {
         </div>
 
         <section className="mt-10">
-          <h2 className="font-display text-xl font-bold text-[var(--yk-forest)]">Mes cours</h2>
+          <h2 className="font-display text-xl font-bold text-[var(--yk-forest)]">
+            Cours de mon académie
+          </h2>
           <div className="mt-4 space-y-3">
             {courses.map((c) => (
               <div key={c.id} className="yk-card">
@@ -89,19 +109,26 @@ export default async function StudioPage() {
                   </p>
                 </div>
                 <p className="mt-2 text-sm text-[var(--yk-muted)]">
-                  {c.status === "published" ? "Publié" : "Brouillon"} · {formatFc(c.priceCdf)} · /
-                  {c.slug}
+                  {statusLabel(c.status)} · {formatFc(c.priceCdf)} · /{c.slug}
                 </p>
+                {c.status === "rejected" && c.reviewNote && (
+                  <p className="mt-1 text-sm text-red-700">Motif : {c.reviewNote}</p>
+                )}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <MeetJoinButton courseId={c.id} />
-                  {c.status === "published" && (
-                    <Link href={`/courses/${c.slug}`} className="yk-btn yk-btn-ghost !py-2 !text-xs">
+                  {(c.status === "published" || c.status === "pending_review") && (
+                    <MeetJoinButton courseId={c.id} />
+                  )}
+                  {(c.status === "published" || c.status === "pending_review") && (
+                    <Link
+                      href={`/courses/${c.slug}?preview=1`}
+                      className="yk-btn yk-btn-ghost !py-2 !text-xs"
+                    >
                       Voir
                     </Link>
                   )}
                   <form action={togglePublishCourse.bind(null, c.id)}>
                     <button type="submit" className="yk-btn yk-btn-secondary !py-2 !text-xs">
-                      {c.status === "published" ? "Dépublier" : "Publier"}
+                      {actionLabel(c.status)}
                     </button>
                   </form>
                 </div>

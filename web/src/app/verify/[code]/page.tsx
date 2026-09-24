@@ -18,10 +18,10 @@ export default async function VerifyPage({
       code: "YK-WEB-2026-JM01",
       userId: "",
       courseId: "",
-      learnerName: "Patty Basoga",
+      learnerName: "Dan Muyumbu",
       courseTitle: "Développement Web Moderne",
-      academyName: "Académie Jeff",
-      teacherName: "Jeff Buleli",
+      academyName: "Académie Patty",
+      teacherName: "Patty Basoga",
       skills: ["Culture numérique", "HTML & CSS", "JavaScript", "Mise en ligne"],
       issuedAt: "2026-09-20",
     };

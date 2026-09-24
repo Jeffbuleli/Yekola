@@ -10,15 +10,43 @@ type Props = {
   role?: "teacher" | "learner" | "admin" | null;
 };
 
+function linksForRole(role: Props["role"]) {
+  if (role === "admin") {
+    return [
+      { href: "/admin", label: "Modération" },
+      { href: "/catalog", label: "Catalogue" },
+    ];
+  }
+  if (role === "teacher") {
+    return [
+      { href: "/studio", label: "Studio" },
+      { href: "/pricing", label: "Tarifs" },
+      { href: "/catalog", label: "Catalogue" },
+    ];
+  }
+  if (role === "learner") {
+    return [
+      { href: "/catalog", label: "Catalogue" },
+      { href: "/learn", label: "Mes cours" },
+    ];
+  }
+  // Visiteur
+  return [
+    { href: "/catalog", label: "Catalogue" },
+    { href: "/pricing", label: "Tarifs enseignants" },
+  ];
+}
+
+function homeForRole(role: Props["role"]) {
+  if (role === "admin") return "/admin";
+  if (role === "teacher") return "/studio";
+  if (role === "learner") return "/learn";
+  return "/auth/login";
+}
+
 export function SiteHeaderClient({ userName, role }: Props) {
   const [open, setOpen] = useState(false);
-
-  const links = [
-    { href: "/catalog", label: "Cours" },
-    { href: "/pricing", label: "Tarifs" },
-    ...(role === "teacher" ? [{ href: "/studio", label: "Studio" }] : []),
-    ...(userName ? [{ href: "/learn", label: "Mes cours" }] : []),
-  ];
+  const links = linksForRole(role);
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--yk-line)] bg-white/95 backdrop-blur">
@@ -56,10 +84,7 @@ export function SiteHeaderClient({ userName, role }: Props) {
             </Link>
           ))}
           {userName ? (
-            <Link
-              href={role === "teacher" ? "/studio" : "/learn"}
-              className="yk-btn yk-btn-primary !py-2 !text-xs"
-            >
+            <Link href={homeForRole(role)} className="yk-btn yk-btn-primary !py-2 !text-xs">
               {userName.split(" ")[0]}
             </Link>
           ) : (
@@ -103,7 +128,7 @@ export function SiteHeaderClient({ userName, role }: Props) {
             ))}
             {userName ? (
               <Link
-                href={role === "teacher" ? "/studio" : "/learn"}
+                href={homeForRole(role)}
                 className="yk-btn yk-btn-primary mt-2"
                 onClick={() => setOpen(false)}
               >

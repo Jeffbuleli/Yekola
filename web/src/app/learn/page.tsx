@@ -11,6 +11,8 @@ import { OfflineReadyBadge } from "@/components/offline-ready-badge";
 export default async function LearnHubPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
+  if (user.role === "admin") redirect("/admin");
+  if (user.role === "teacher") redirect("/studio");
 
   const items = userEnrollments(user.id);
   const db = getDb();

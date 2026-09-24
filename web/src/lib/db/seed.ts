@@ -1,19 +1,30 @@
 import { hashPassword, newId } from "@/lib/auth/crypto";
 import type { Academy, Course, DbShape, User } from "@/lib/types";
 
-export const SEED_VERSION = 4;
+export const SEED_VERSION = 5;
 const DEMO_PASSWORD = "yekola2026";
 
 export function buildSeed(): DbShape {
   const now = new Date().toISOString();
+  const adminId = newId("usr");
   const teacherId = newId("usr");
   const learnerId = newId("usr");
   const academyId = newId("acd");
 
-  const teacher: User = {
-    id: teacherId,
+  const admin: User = {
+    id: adminId,
     email: "jeff@yekola.demo",
     name: "Jeff Buleli",
+    role: "admin",
+    passwordHash: hashPassword(DEMO_PASSWORD),
+    academyId: null,
+    createdAt: now,
+  };
+
+  const teacher: User = {
+    id: teacherId,
+    email: "patty@yekola.demo",
+    name: "Patty Basoga",
     role: "teacher",
     passwordHash: hashPassword(DEMO_PASSWORD),
     academyId,
@@ -22,8 +33,8 @@ export function buildSeed(): DbShape {
 
   const learner: User = {
     id: learnerId,
-    email: "patty@yekola.demo",
-    name: "Patty Basoga",
+    email: "dan@yekola.demo",
+    name: "Dan Muyumbu",
     role: "learner",
     passwordHash: hashPassword(DEMO_PASSWORD),
     academyId: null,
@@ -32,8 +43,8 @@ export function buildSeed(): DbShape {
 
   const academy: Academy = {
     id: academyId,
-    slug: "academie-jeff",
-    name: "Académie Jeff",
+    slug: "academie-patty",
+    name: "Académie Patty",
     ownerId: teacherId,
     city: "Kinshasa",
     bio: "Formations pratiques pour entrepreneurs et jeunes motivés.",
@@ -55,6 +66,9 @@ export function buildSeed(): DbShape {
     priceCdf: 1000,
     currency: "CDF",
     status: "published",
+    reviewNote: null,
+    reviewedAt: now,
+    reviewedBy: adminId,
     coverIcon: "code",
     createdAt: now,
     updatedAt: now,
@@ -321,6 +335,9 @@ Pages statiques : Netlify, GitHub Pages, ou hébergeur local. Gardez une copie h
     priceCdf: 500,
     currency: "CDF",
     status: "published",
+    reviewNote: null,
+    reviewedAt: now,
+    reviewedBy: adminId,
     coverIcon: "wallet",
     createdAt: now,
     updatedAt: now,
@@ -523,7 +540,10 @@ Volumes par opérateur, frais estimés, incidents. Une demi-page suffit.`,
       "Transformez WhatsApp en vitrine pro : profil, catalogue photos, devis clairs, relances et paiements MoMo. Trois modules progressifs avec quiz.",
     priceCdf: 750,
     currency: "CDF",
-    status: "published",
+    status: "pending_review",
+    reviewNote: null,
+    reviewedAt: null,
+    reviewedBy: null,
     coverIcon: "store",
     createdAt: now,
     updatedAt: now,
@@ -708,7 +728,7 @@ Après livraison : « Une photo vous va ? » Republiez (avec accord) en Status.`
 
   return {
     seedVersion: SEED_VERSION,
-    users: [teacher, learner],
+    users: [admin, teacher, learner],
     academies: [academy],
     courses: [courseWeb, courseMomo, courseWhatsapp],
     enrollments: [],
