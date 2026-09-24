@@ -44,7 +44,13 @@ function LoginForm() {
         return;
       }
       const role = data.user.role as string;
-      router.push(role === "admin" ? "/admin" : role === "teacher" ? "/studio" : "/learn");
+      const next = params.get("next");
+      const safeNext =
+        next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+      router.push(
+        safeNext ||
+          (role === "admin" ? "/admin" : role === "teacher" ? "/studio" : "/learn"),
+      );
       router.refresh();
     } catch {
       setError("Erreur réseau.");

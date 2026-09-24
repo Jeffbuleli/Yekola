@@ -2,6 +2,8 @@ import { SiteHeader } from "@/components/site-header";
 import { CourseCard } from "@/components/course-card";
 import { listPublishedCourses } from "@/lib/db/queries";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Catalogue - Yekola",
   description: "Achetez un cours et apprenez hors ligne après l’achat.",

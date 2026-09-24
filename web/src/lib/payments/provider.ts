@@ -31,7 +31,7 @@ export interface PaymentProvider {
   initiate(input: PaymentInput): Promise<PaymentResult>;
 }
 
-function refFor(_kind: PaymentInput["kind"]) {
+function refFor() {
   // PawaPay v2: depositId / payoutId must be UUID length 36 (with hyphens).
   return randomUUID();
 }
@@ -43,7 +43,7 @@ export const DemoPaymentProvider: PaymentProvider = {
   async initiate(input) {
     return {
       status: "demo",
-      reference: refFor(input.kind),
+      reference: refFor(),
       message: `Paiement simulé : ${input.amount} ${input.currency}. Aucun débit réel.`,
       provider: "demo",
       msisdn: input.msisdn ? normalizeCodPhone(input.msisdn) : undefined,
@@ -59,7 +59,7 @@ export const MomoPaymentProvider: PaymentProvider = {
     if (!isPawapayConfigured()) {
       return {
         status: "failed",
-        reference: refFor(input.kind),
+        reference: refFor(),
         message:
           "Mobile Money non configuré (PAWAPAY_API_TOKEN manquant). Utilisez YEKOOLA_PAYMENTS=demo pour les tests.",
         provider: "momo",
@@ -69,7 +69,7 @@ export const MomoPaymentProvider: PaymentProvider = {
     if (!input.msisdn || !isValidCodMsisdn(input.msisdn)) {
       return {
         status: "failed",
-        reference: refFor(input.kind),
+        reference: refFor(),
         message: "Numéro Mobile Money invalide (ex. 0812… ou 243812…).",
         provider: "momo",
       };
@@ -81,7 +81,7 @@ export const MomoPaymentProvider: PaymentProvider = {
     if (!momoProvider) {
       return {
         status: "failed",
-        reference: refFor(input.kind),
+        reference: refFor(),
         message: "Opérateur non reconnu. Choisissez Airtel, Orange ou M-Pesa.",
         provider: "momo",
       };
@@ -90,7 +90,7 @@ export const MomoPaymentProvider: PaymentProvider = {
     if (input.amount <= 0 && input.kind !== "teacher_subscription") {
       return {
         status: "paid",
-        reference: refFor(input.kind),
+        reference: refFor(),
         message: "Montant nul - aucune collecte MoMo.",
         provider: "momo",
         msisdn,
@@ -102,7 +102,7 @@ export const MomoPaymentProvider: PaymentProvider = {
     if (input.kind === "teacher_subscription" && input.amount <= 0) {
       return {
         status: "paid",
-        reference: refFor(input.kind),
+        reference: refFor(),
         message: "Plan Free activé.",
         provider: "momo",
         msisdn,
@@ -110,7 +110,7 @@ export const MomoPaymentProvider: PaymentProvider = {
       };
     }
 
-    const reference = refFor(input.kind);
+    const reference = refFor();
 
     try {
       if (input.kind === "withdrawal") {

@@ -868,5 +868,6 @@ Haute tension, incendie, odeur de brûlé persistante, doute sur le schéma : st
     subscriptions: [],
     payments: [],
     syncAccepted: [],
+    sessions: [],
   };
 }

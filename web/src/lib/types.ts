@@ -190,6 +190,12 @@ export type SyncAccepted = {
   acceptedAt: string;
 };
 
+export type SessionRecord = {
+  tokenHash: string;
+  userId: string;
+  expiresAt: string;
+};
+
 export type DbShape = {
   seedVersion: number;
   users: User[];
@@ -202,4 +208,5 @@ export type DbShape = {
   subscriptions: SubscriptionPayment[];
   payments: PaymentIntent[];
   syncAccepted: SyncAccepted[];
+  sessions: SessionRecord[];
 };

@@ -19,9 +19,11 @@ if [[ "${1:-}" == "--on-server" ]]; then
   fi
   npm install
   npm run build
-  # Force reseed Jeff/Patty + tarifs FC si ancienne DB
-  rm -f "$REMOTE_DIR/web/data/store.json" "$REMOTE_DIR/web/.next/standalone/data/store.json" 2>/dev/null || true
+  # Preserve user data / sessions across deploys (do not wipe store.json)
   mkdir -p "$REMOTE_DIR/web/data" "$REMOTE_DIR/web/.next/standalone/data"
+  if [[ -f "$REMOTE_DIR/web/data/store.json" ]]; then
+    cp -a "$REMOTE_DIR/web/data/store.json" "$REMOTE_DIR/web/.next/standalone/data/store.json" || true
+  fi
   cp -a "$REMOTE_DIR/web/public/." "$REMOTE_DIR/web/.next/standalone/public/" || true
   cp -a "$REMOTE_DIR/web/.next/static" "$REMOTE_DIR/web/.next/standalone/.next/" || true
 
@@ -36,6 +38,7 @@ WorkingDirectory=/opt/yekola/web/.next/standalone
 EnvironmentFile=-/opt/yekola/web/.env
 Environment=PORT=3015
 Environment=HOSTNAME=127.0.0.1
+Environment=YEKOOLA_DATA_DIR=/opt/yekola/web/data
 ExecStart=/usr/bin/node server.js
 Restart=always
 RestartSec=3

@@ -3,7 +3,8 @@ import path from "path";
 import type { DbShape } from "@/lib/types";
 import { buildSeed, SEED_VERSION } from "@/lib/db/seed";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+const DATA_DIR =
+  process.env.YEKOOLA_DATA_DIR?.trim() || path.join(process.cwd(), "data");
 const DATA_FILE = path.join(DATA_DIR, "store.json");
 
 declare global {
@@ -23,12 +24,14 @@ function emptyDb(): DbShape {
     subscriptions: [],
     payments: [],
     syncAccepted: [],
+    sessions: [],
   };
 }
 
 function ensureShape(db: DbShape): DbShape {
   if (!Array.isArray(db.payments)) db.payments = [];
   if (!Array.isArray(db.syncAccepted)) db.syncAccepted = [];
+  if (!Array.isArray(db.sessions)) db.sessions = [];
   for (const u of db.users) {
     if (u.emailVerifiedAt === undefined) {
       // Comptes démo / legacy : considérés confirmés

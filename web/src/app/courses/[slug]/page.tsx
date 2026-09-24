@@ -7,6 +7,8 @@ import { enrollmentFor, getCourseBySlug } from "@/lib/db/queries";
 import { BuyCourseButton } from "@/components/buy-course-button";
 import { formatFc } from "@/lib/plans";
 
+export const dynamic = "force-dynamic";
+
 export default async function CoursePage({
   params,
 }: {
@@ -79,7 +81,7 @@ export default async function CoursePage({
             <BuyCourseButton courseId={course.id} priceCdf={course.priceCdf} />
           ) : (
             <Link
-              href={`/auth/login?email=dan@yekola.demo`}
+              href={`/auth/login?next=${encodeURIComponent(`/courses/${slug}`)}`}
               className="yk-btn yk-btn-primary w-full sm:w-auto"
             >
               Se connecter pour acheter

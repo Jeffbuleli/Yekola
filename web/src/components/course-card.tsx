@@ -30,6 +30,7 @@ export function CourseCard({
   return (
     <Link
       href={href}
+      prefetch={false}
       className={
         dark
           ? "block overflow-hidden rounded-xl border border-emerald-500/20 bg-black/50 transition hover:border-[var(--yk-mint)]/50"
