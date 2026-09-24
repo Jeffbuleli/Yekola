@@ -10,12 +10,12 @@ function VerifyClient() {
   const params = useSearchParams();
   const token = params.get("token") ?? "";
   const [status, setStatus] = useState<"loading" | "ok" | "err">("loading");
-  const [message, setMessage] = useState("Confirmation en cours…");
+  const [message, setMessage] = useState("Confirmation…");
 
   useEffect(() => {
     if (!token) {
       setStatus("err");
-      setMessage("Lien de confirmation invalide.");
+      setMessage("Lien invalide.");
       return;
     }
     let cancelled = false;
@@ -24,6 +24,7 @@ function VerifyClient() {
         const res = await fetch("/api/auth", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
           body: JSON.stringify({ action: "verify_email", token }),
         });
         const data = await res.json();
@@ -32,20 +33,20 @@ function VerifyClient() {
           setStatus("err");
           setMessage(
             data.error === "invalid_or_expired"
-              ? "Lien expiré ou déjà utilisé. Demandez un nouvel email."
+              ? "Lien expiré ou déjà utilisé."
               : "Confirmation impossible.",
           );
           return;
         }
         setStatus("ok");
-        setMessage("Compte confirmé. Redirection…");
+        setMessage("Compte confirmé.");
         const role = data.user?.role as string;
         setTimeout(() => {
           router.push(
             role === "admin" ? "/admin" : role === "teacher" ? "/studio" : "/learn",
           );
           router.refresh();
-        }, 800);
+        }, 600);
       } catch {
         if (!cancelled) {
           setStatus("err");
@@ -59,22 +60,19 @@ function VerifyClient() {
   }, [token, router]);
 
   return (
-    <AuthShell title="Confirmation du compte" subtitle="Validation de votre adresse email.">
-      <p
-        className={`text-sm ${status === "err" ? "text-red-600" : "text-[var(--yk-forest)]"}`}
-      >
-        {message}
-      </p>
-      {status === "err" && (
-        <div className="mt-6 space-y-3">
-          <Link href={`/auth/check-email`} className="yk-btn yk-btn-primary w-full">
+    <AuthShell
+      title="Confirmation"
+      footer={
+        status === "err" ? (
+          <Link href="/auth/check-email" className="font-bold text-[var(--yk-teal)]">
             Renvoyer l’email
           </Link>
-          <Link href="/auth/login" className="yk-btn yk-btn-ghost w-full">
-            Connexion
-          </Link>
-        </div>
-      )}
+        ) : null
+      }
+    >
+      <p className={`text-sm ${status === "err" ? "text-red-600" : "text-[var(--yk-forest)]"}`}>
+        {message}
+      </p>
     </AuthShell>
   );
 }

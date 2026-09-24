@@ -3,16 +3,19 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { AuthShell } from "@/components/auth-shell";
+import {
+  AuthShell,
+  authInputClass,
+  authLabelClass,
+} from "@/components/auth-shell";
 
 function CheckEmailForm() {
   const params = useSearchParams();
   const [email, setEmail] = useState(params.get("email") ?? "");
-  const sent = params.get("sent") === "1";
   const [info, setInfo] = useState(
-    sent
-      ? "Ouvrez votre boîte mail et cliquez sur le lien de confirmation."
-      : "Compte créé. Si l’email n’arrive pas, renvoyez-le ci-dessous.",
+    params.get("sent") === "1"
+      ? "Ouvrez le lien reçu par email."
+      : "Compte créé. Renvoyez l’email si besoin.",
   );
   const [busy, setBusy] = useState(false);
 
@@ -28,8 +31,8 @@ function CheckEmailForm() {
       const data = await res.json();
       setInfo(
         data.emailSent === false
-          ? "Envoi impossible pour le moment. Réessayez dans une minute."
-          : "Email renvoyé (si le compte existe et n’est pas encore confirmé).",
+          ? "Envoi impossible. Réessayez."
+          : "Email renvoyé.",
       );
     } finally {
       setBusy(false);
@@ -39,35 +42,31 @@ function CheckEmailForm() {
   return (
     <AuthShell
       title="Vérifiez votre email"
-      subtitle="Un dernier clic pour activer votre compte Yekola."
+      footer={
+        <Link href="/auth/login" className="font-bold text-[var(--yk-teal)]">
+          Connexion
+        </Link>
+      }
     >
       <div className="space-y-4">
-        <p className="text-sm leading-relaxed text-[var(--yk-forest)]">{info}</p>
-        {email && (
-          <p className="rounded-lg bg-[var(--yk-paper)] px-3 py-2 text-sm font-semibold text-[var(--yk-teal)]">
-            {email}
-          </p>
-        )}
-        <label className="block text-sm font-semibold text-[var(--yk-forest)]">
+        <p className="text-sm text-[var(--yk-forest)]">{info}</p>
+        <label className={authLabelClass}>
           Email
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1.5 w-full rounded-lg border border-[var(--yk-line)] px-3 py-2.5 text-sm"
+            className={authInputClass}
           />
         </label>
         <button
           type="button"
           disabled={busy || !email}
-          onClick={resend}
+          onClick={() => void resend()}
           className="yk-btn yk-btn-secondary w-full"
         >
-          {busy ? "Envoi…" : "Renvoyer l’email de confirmation"}
+          {busy ? "…" : "Renvoyer"}
         </button>
-        <Link href="/auth/login" className="yk-btn yk-btn-ghost w-full">
-          J’ai confirmé · Se connecter
-        </Link>
       </div>
     </AuthShell>
   );

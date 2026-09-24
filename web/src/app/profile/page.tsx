@@ -4,7 +4,10 @@ import { AppShell, ADMIN_NAV, LEARNER_NAV, TEACHER_NAV } from "@/components/app-
 import { SiteHeader } from "@/components/site-header";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/store";
+export const dynamic = "force-dynamic";
+
 import { LogoutButton } from "@/components/logout-button";
+import { PasskeyManagePanel } from "@/components/passkey-manage-panel";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
@@ -86,6 +89,7 @@ export default async function ProfilePage() {
             <p className="text-sm">Validation des contenus avant publication.</p>
           )}
         </article>
+          <PasskeyManagePanel />
       </div>
       <div className="mt-6">
         <LogoutButton />

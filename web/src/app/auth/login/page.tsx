@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
-import { AuthShell } from "@/components/auth-shell";
+import {
+  AuthShell,
+  authInputClass,
+  authLabelClass,
+} from "@/components/auth-shell";
+import { PasskeyLoginButton } from "@/components/passkey-login-button";
 
 function LoginForm() {
   const router = useRouter();
@@ -12,14 +17,25 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [info, setInfo] = useState(
-    params.get("verified") === "1"
-      ? "Email confirmé. Vous pouvez vous connecter."
-      : params.get("reset") === "1"
-        ? "Mot de passe mis à jour. Connectez-vous."
+    params.get("reset") === "1"
+      ? "Mot de passe mis à jour."
+      : params.get("verified") === "1"
+        ? "Email confirmé."
         : "",
   );
   const [busy, setBusy] = useState(false);
   const [needVerify, setNeedVerify] = useState(false);
+
+  function goAfterLogin(role: string) {
+    const next = params.get("next");
+    const safe =
+      next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+    router.push(
+      safe ||
+        (role === "admin" ? "/admin" : role === "teacher" ? "/studio" : "/learn"),
+    );
+    router.refresh();
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -31,27 +47,20 @@ function LoginForm() {
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({ action: "login", email, password }),
       });
       const data = await res.json();
       if (!res.ok) {
         if (data.error === "email_not_verified") {
           setNeedVerify(true);
-          setError(data.message || "Confirmez votre email d’abord.");
+          setError("Confirmez votre email.");
           return;
         }
         setError("Email ou mot de passe incorrect.");
         return;
       }
-      const role = data.user.role as string;
-      const next = params.get("next");
-      const safeNext =
-        next && next.startsWith("/") && !next.startsWith("//") ? next : null;
-      router.push(
-        safeNext ||
-          (role === "admin" ? "/admin" : role === "teacher" ? "/studio" : "/learn"),
-      );
-      router.refresh();
+      goAfterLogin(data.user.role);
     } catch {
       setError("Erreur réseau.");
     } finally {
@@ -62,12 +71,17 @@ function LoginForm() {
   async function resendVerify() {
     setBusy(true);
     try {
-      await fetch("/api/auth", {
+      const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "resend_verify", email }),
       });
-      setInfo("Si un compte existe, un nouvel email de confirmation a été envoyé.");
+      const data = await res.json();
+      setInfo(
+        data.emailSent === false
+          ? "Envoi impossible. Réessayez."
+          : "Email de confirmation renvoyé.",
+      );
       setError("");
     } finally {
       setBusy(false);
@@ -77,10 +91,17 @@ function LoginForm() {
   return (
     <AuthShell
       title="Connexion"
-      subtitle="Accédez à vos cours ou à votre studio enseignant."
+      footer={
+        <>
+          Pas de compte ?{" "}
+          <Link href="/auth/register" className="font-bold text-[var(--yk-teal)]">
+            S’inscrire
+          </Link>
+        </>
+      }
     >
       <form onSubmit={onSubmit} className="space-y-4">
-        <label className="block text-sm font-semibold text-[var(--yk-forest)]">
+        <label className={authLabelClass}>
           Email
           <input
             type="email"
@@ -88,55 +109,67 @@ function LoginForm() {
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1.5 w-full rounded-lg border border-[var(--yk-line)] px-3 py-2.5 text-sm outline-none focus:border-[var(--yk-teal)]"
+            className={authInputClass}
+            placeholder="you@email.com"
           />
         </label>
-        <label className="block text-sm font-semibold text-[var(--yk-forest)]">
-          Mot de passe
+        <div>
+          <div className="flex items-center justify-between gap-2">
+            <label className={authLabelClass}>Mot de passe</label>
+            <Link
+              href="/auth/forgot"
+              className="text-xs font-bold text-[var(--yk-teal)]"
+            >
+              Oublié ?
+            </Link>
+          </div>
           <input
             type="password"
             required
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1.5 w-full rounded-lg border border-[var(--yk-line)] px-3 py-2.5 text-sm outline-none focus:border-[var(--yk-teal)]"
+            className={authInputClass}
           />
-        </label>
-        <div className="flex justify-end">
-          <Link
-            href="/auth/forgot"
-            className="text-xs font-bold text-[var(--yk-teal)] hover:underline"
-          >
-            Mot de passe oublié ?
-          </Link>
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {info && <p className="text-sm text-[var(--yk-teal)]">{info}</p>}
+        {error && (
+          <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+        {info && (
+          <p className="rounded-xl border border-[var(--yk-line)] bg-[var(--yk-paper)] px-3 py-2 text-sm text-[var(--yk-teal)]">
+            {info}
+          </p>
+        )}
         {needVerify && (
           <button
             type="button"
             disabled={busy}
-            onClick={resendVerify}
+            onClick={() => void resendVerify()}
             className="text-sm font-bold text-[var(--yk-amber)] underline"
           >
-            Renvoyer l’email de confirmation
+            Renvoyer la confirmation
           </button>
         )}
         <button type="submit" disabled={busy} className="yk-btn yk-btn-primary w-full">
-          {busy ? "Connexion…" : "Se connecter"}
+          {busy ? "…" : "Se connecter"}
         </button>
       </form>
-      <p className="mt-6 text-center text-sm text-[var(--yk-muted)]">
-        Pas de compte ?{" "}
-        <Link href="/auth/register" className="font-bold text-[var(--yk-teal)]">
-          S’inscrire
-        </Link>
-      </p>
-      <p className="mt-4 rounded-lg bg-[var(--yk-paper)] px-3 py-2 text-[11px] leading-relaxed text-[var(--yk-muted)]">
-        Démo · mdp <code className="font-semibold">yekola2026</code>
-        <br />
-        dan@yekola.demo · patty@yekola.demo · jeff@yekola.demo
-      </p>
+
+      <div className="relative my-5">
+        <div className="absolute inset-0 flex items-center" aria-hidden>
+          <div className="w-full border-t border-[var(--yk-line)]" />
+        </div>
+        <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest text-[var(--yk-muted)]">
+          <span className="bg-white px-2">ou</span>
+        </div>
+      </div>
+
+      <PasskeyLoginButton
+        email={email}
+        onSuccess={(data) => goAfterLogin(data.user.role)}
+      />
     </AuthShell>
   );
 }

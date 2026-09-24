@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { startAuthentication } from "@simplewebauthn/browser";
 import { formatFc } from "@/lib/plans";
 import { MOMO_OPTIONS } from "@/lib/payments/momo-providers";
 import { PaymentPendingPanel } from "@/components/payment-pending-panel";
@@ -23,6 +24,7 @@ export default function WalletPage() {
   const [msg, setMsg] = useState("");
   const [mode, setMode] = useState("demo");
   const [pendingRef, setPendingRef] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   async function refresh() {
     const res = await fetch("/api/studio");
@@ -36,32 +38,68 @@ export default function WalletPage() {
     refresh();
   }, []);
 
-  async function withdraw() {
-    setMsg("");
-    setPendingRef(null);
-    const res = await fetch("/api/studio", {
+  async function ensureSudo() {
+    const optRes = await fetch("/api/auth/passkey", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "withdraw",
-        amount,
-        msisdn: msisdn || undefined,
-        momoProvider: momoProvider || undefined,
-      }),
+      credentials: "same-origin",
+      body: JSON.stringify({ action: "stepup_options" }),
     });
-    const d = await res.json();
-    if (!res.ok) {
-      setMsg(d.message || d.error || "Échec");
-      return;
+    const opt = await optRes.json();
+    if (!optRes.ok) {
+      if (opt.error === "no_passkey") return {};
+      throw new Error(opt.message || opt.error || "SUDO impossible");
     }
-    if (d.pending && d.reference) {
-      setPendingRef(d.reference);
-      setMsg(d.payment?.message || "Retrait en cours");
+    const assertion = await startAuthentication({ optionsJSON: opt.options });
+    return { passkeyChallengeId: opt.challengeId, passkeyResponse: assertion };
+  }
+
+  async function withdraw() {
+    setBusy(true);
+    setMsg("");
+    setPendingRef(null);
+    try {
+      let sudoPayload: Record<string, unknown> = {};
+      try {
+        sudoPayload = await ensureSudo();
+      } catch {
+        /* no passkey → server allows */
+      }
+
+      const res = await fetch("/api/studio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          action: "withdraw",
+          amount,
+          msisdn: msisdn || undefined,
+          momoProvider: momoProvider || undefined,
+          ...sudoPayload,
+        }),
+      });
+      const d = await res.json();
+      if (!res.ok) {
+        if (d.error === "sudo_required") {
+          setMsg("Ajoutez une passkey (Profil) puis validez SUDO pour retirer.");
+        } else {
+          setMsg(d.message || d.error || "Échec");
+        }
+        return;
+      }
+      if (d.pending && d.reference) {
+        setPendingRef(d.reference);
+        setMsg(d.payment?.message || "Retrait en cours");
+        await refresh();
+        return;
+      }
+      setMsg(d.payment?.message || "Retrait initié");
       await refresh();
-      return;
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
     }
-    setMsg(d.payment?.message || "Retrait initié");
-    await refresh();
   }
 
   return (
@@ -94,6 +132,9 @@ export default function WalletPage() {
         ) : (
           <div className="yk-card mt-6 space-y-3">
             <h2 className="font-display font-bold">Retrait Mobile Money</h2>
+            <p className="text-xs text-[var(--yk-muted)]">
+              Si une passkey est enregistrée, SUDO sera demandé.
+            </p>
             <input
               type="number"
               min={1}
@@ -119,8 +160,13 @@ export default function WalletPage() {
                 </option>
               ))}
             </select>
-            <button type="button" onClick={withdraw} className="yk-btn yk-btn-primary">
-              Retirer
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void withdraw()}
+              className="yk-btn yk-btn-primary"
+            >
+              {busy ? "…" : "Retirer"}
             </button>
             {msg && <p className="text-sm text-[var(--yk-muted)]">{msg}</p>}
           </div>

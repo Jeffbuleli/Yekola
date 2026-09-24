@@ -25,6 +25,8 @@ function emptyDb(): DbShape {
     payments: [],
     syncAccepted: [],
     sessions: [],
+    passkeys: [],
+    webauthnChallenges: [],
   };
 }
 
@@ -32,6 +34,8 @@ function ensureShape(db: DbShape): DbShape {
   if (!Array.isArray(db.payments)) db.payments = [];
   if (!Array.isArray(db.syncAccepted)) db.syncAccepted = [];
   if (!Array.isArray(db.sessions)) db.sessions = [];
+  if (!Array.isArray(db.passkeys)) db.passkeys = [];
+  if (!Array.isArray(db.webauthnChallenges)) db.webauthnChallenges = [];
   for (const u of db.users) {
     if (u.emailVerifiedAt === undefined) {
       // Comptes démo / legacy : considérés confirmés

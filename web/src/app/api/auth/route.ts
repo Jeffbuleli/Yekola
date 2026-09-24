@@ -235,8 +235,19 @@ export async function POST(req: Request) {
     if (!email) {
       return NextResponse.json({ error: "email_required" }, { status: 400 });
     }
+    if (!canSendViaResend()) {
+      return NextResponse.json(
+        {
+          error: "email_unavailable",
+          message: "Envoi d’emails indisponible. Réessayez plus tard ou contactez hi@mcbuleli.org.",
+        },
+        { status: 503 },
+      );
+    }
     const db = getDb();
     const user = db.users.find((u) => u.email === email);
+    let emailSent = false;
+    let sendError: string | undefined;
     if (user) {
       const resetRaw = rawAuthToken();
       mutateDb((d) => {
@@ -245,16 +256,31 @@ export async function POST(req: Request) {
         u.passwordResetTokenHash = hashAuthToken(resetRaw);
         u.passwordResetExpiresAt = expiresInHours(1);
       });
-      await notifyPasswordReset({
+      const mail = await notifyPasswordReset({
         to: email,
         name: user.name,
         rawToken: resetRaw,
       });
+      emailSent = mail.ok;
+      sendError = mail.error;
+      if (!mail.ok) {
+        return NextResponse.json(
+          {
+            error: "email_failed",
+            message: `Échec d’envoi Resend (${mail.error || "inconnu"}). Vérifiez spam ou réessayez.`,
+            emailSent: false,
+          },
+          { status: 502 },
+        );
+      }
     }
     return NextResponse.json({
       ok: true,
-      message:
-        "Si un compte existe pour cet email, un lien de récupération a été envoyé.",
+      emailSent: user ? emailSent : false,
+      message: user
+        ? "Lien de récupération envoyé. Vérifiez votre boîte (et spam)."
+        : "Si un compte existe pour cet email, un lien a été envoyé.",
+      sendError,
     });
   }
 

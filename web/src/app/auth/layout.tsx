@@ -1,10 +1,6 @@
-import { SiteHeader } from "@/components/site-header";
+import { ReactNode } from "react";
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen bg-[var(--yk-paper)]">
-      <SiteHeader />
-      {children}
-    </div>
-  );
+/** Auth pages: no site header clutter — just the form shell. */
+export default function AuthLayout({ children }: { children: ReactNode }) {
+  return <div className="min-h-screen bg-[var(--yk-paper)]">{children}</div>;
 }

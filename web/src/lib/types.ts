@@ -196,6 +196,25 @@ export type SessionRecord = {
   expiresAt: string;
 };
 
+export type PasskeyRecord = {
+  id: string;
+  userId: string;
+  credentialId: string;
+  publicKey: string;
+  counter: number;
+  deviceName: string | null;
+  transports: string[] | null;
+  createdAt: string;
+};
+
+export type WebAuthnChallenge = {
+  id: string;
+  userId: string | null;
+  purpose: "passkey_register" | "passkey_login" | "passkey_stepup";
+  challenge: string;
+  expiresAt: string;
+};
+
 export type DbShape = {
   seedVersion: number;
   users: User[];
@@ -209,4 +228,6 @@ export type DbShape = {
   payments: PaymentIntent[];
   syncAccepted: SyncAccepted[];
   sessions: SessionRecord[];
+  passkeys: PasskeyRecord[];
+  webauthnChallenges: WebAuthnChallenge[];
 };

@@ -4,6 +4,7 @@ import { newId } from "@/lib/auth/crypto";
 import { getDb, mutateDb } from "@/lib/db/store";
 import { getPlan, PLANS } from "@/lib/plans";
 import { getPaymentProvider, paymentsMode } from "@/lib/payments/provider";
+import { assertSudoOrPasskey } from "@/lib/auth/sudo";
 import { fulfillPaymentIntent } from "@/lib/payments/fulfill";
 import { academyStats } from "@/lib/db/queries";
 import type { PaymentIntent, PlanId } from "@/lib/types";
@@ -93,6 +94,17 @@ export async function POST(req: Request) {
     const amount = Number(body.amount);
     if (!Number.isFinite(amount) || amount <= 0) {
       return NextResponse.json({ error: "invalid_amount" }, { status: 400 });
+    }
+    const sudo = await assertSudoOrPasskey({
+      userId: user.id,
+      passkeyChallengeId: body?.passkeyChallengeId ? String(body.passkeyChallengeId) : null,
+      passkeyResponse: body?.passkeyResponse,
+    });
+    if (!sudo.ok) {
+      return NextResponse.json(
+        { error: sudo.error, message: "Validez SUDO (passkey) pour retirer." },
+        { status: 403 },
+      );
     }
     const db = getDb();
     const academy = db.academies.find((a) => a.id === user.academyId)!;

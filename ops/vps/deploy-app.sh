@@ -36,6 +36,7 @@ After=network.target
 Type=simple
 WorkingDirectory=/opt/yekola/web/.next/standalone
 EnvironmentFile=-/opt/yekola/web/.env
+Environment=NODE_ENV=production
 Environment=PORT=3015
 Environment=HOSTNAME=127.0.0.1
 Environment=YEKOOLA_DATA_DIR=/opt/yekola/web/data
