@@ -31,10 +31,9 @@ export interface PaymentProvider {
   initiate(input: PaymentInput): Promise<PaymentResult>;
 }
 
-function refFor(kind: PaymentInput["kind"]) {
-  const prefix =
-    kind === "withdrawal" ? "ykpo" : kind === "teacher_subscription" ? "yksub" : "ykbuy";
-  return `${prefix}_${randomUUID().replace(/-/g, "")}`;
+function refFor(_kind: PaymentInput["kind"]) {
+  // PawaPay v2: depositId / payoutId must be UUID length 36 (with hyphens).
+  return randomUUID();
 }
 
 /** DEMO — aucun débit réel ; fulfillment immédiat côté API. */
