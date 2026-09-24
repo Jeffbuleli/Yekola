@@ -17,7 +17,7 @@ if [[ "${1:-}" == "--on-server" ]]; then
     source "$REMOTE_DIR/web/.env"
     set +a
   fi
-  npm ci --omit=dev
+  npm install --omit=dev
   npm run build
   mkdir -p "$REMOTE_DIR/web/.next/standalone/public"
   cp -a "$REMOTE_DIR/web/public/." "$REMOTE_DIR/web/.next/standalone/public/" || true
