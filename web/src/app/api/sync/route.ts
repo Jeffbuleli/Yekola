@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { newId } from "@/lib/auth/crypto";
 import { mutateDb, getDb } from "@/lib/db/store";
-import type { Certificate, ProgressRecord } from "@/lib/types";
+import {
+  ensureProgressRow,
+  evaluateProgress,
+  recomputeAndMaybeCertify,
+} from "@/lib/progress/certify";
 
 /**
  * Sync offline → serveur.
@@ -49,20 +52,7 @@ export async function POST(req: Request) {
           continue;
         }
 
-        let p = d.progress.find((x) => x.userId === user.id && x.courseId === courseId);
-        if (!p) {
-          p = {
-            id: newId("prg"),
-            userId: user.id,
-            courseId,
-            lessonId: null,
-            completedLessonIds: [],
-            quizScores: {},
-            percent: 0,
-            updatedAt: new Date().toISOString(),
-          } satisfies ProgressRecord;
-          d.progress.push(p);
-        }
+        const p = ensureProgressRow(d, user.id, courseId);
 
         if (type === "LESSON_COMPLETED") {
           const lessonId = String(payload.lessonId ?? "");
@@ -77,48 +67,23 @@ export async function POST(req: Request) {
           const quizScore =
             typeof payload.quizScore === "number" ? payload.quizScore : null;
           if (quizModuleId && quizScore != null) {
-            p.quizScores[quizModuleId] = quizScore;
+            const prev = p.quizScores[quizModuleId];
+            if (prev == null || quizScore > prev) {
+              p.quizScores[quizModuleId] = quizScore;
+            }
           }
         }
 
-        const allLessons = course.modules.flatMap((m) => m.lessons.map((l) => l.id));
-        p.percent = Math.round(
-          (p.completedLessonIds.length / Math.max(allLessons.length, 1)) * 100,
-        );
+        const evald = evaluateProgress(course, p);
+        p.percent = evald.percent;
         p.updatedAt = new Date().toISOString();
-
-        if (p.percent >= 100) {
-          const existing = d.certificates.find(
-            (c) => c.userId === user.id && c.courseId === courseId,
-          );
-          if (!existing) {
-            const academy = d.academies.find((a) => a.id === course.academyId);
-            const teacher = academy
-              ? d.users.find((u) => u.id === academy.ownerId)
-              : null;
-            const cert: Certificate = {
-              id: newId("crt"),
-              code: `YK-${course.slug.slice(0, 8).toUpperCase()}-${user.id.slice(-4).toUpperCase()}`,
-              userId: user.id,
-              courseId,
-              learnerName: user.name,
-              courseTitle: course.title,
-              academyName: academy?.name ?? "Yekola",
-              teacherName: teacher?.name ?? "Formateur",
-              skills: course.modules.map((m) => m.title),
-              issuedAt: new Date().toISOString().slice(0, 10),
-            };
-            d.certificates.push(cert);
-          }
-        }
+        recomputeAndMaybeCertify({ d, user, course, progress: p });
       }
 
       accepted.push(id);
     }
   });
 
-  // Touch getDb so in-memory is consistent after mutate
   getDb();
-
   return NextResponse.json({ accepted, applied: accepted.length });
 }

@@ -243,6 +243,7 @@ export async function syncNow(): Promise<{ synced: number; mode: ConnectivityMod
   const res = await fetch("/api/sync", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
     body: JSON.stringify({ events: pending }),
   });
   if (!res.ok) throw new Error("sync_failed");

@@ -7,6 +7,7 @@ import {
   getQuizFromPack,
   isOfflineMode,
   queueEvent,
+  syncNow,
 } from "@/lib/sync/sync-manager";
 
 type Q = {
@@ -17,14 +18,18 @@ type Q = {
   explanation: string;
 };
 
+const PASS = 70;
+
 export default function QuizPage() {
   const params = useParams<{ courseId: string; moduleId: string }>();
   const router = useRouter();
   const [questions, setQuestions] = useState<Q[]>([]);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [result, setResult] = useState<string | null>(null);
+  const [passed, setPassed] = useState<boolean | null>(null);
   const [title, setTitle] = useState("Quiz");
   const [source, setSource] = useState<"server" | "pack">("server");
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,7 +44,9 @@ export default function QuizPage() {
           return;
         }
       }
-      const res = await fetch(`/api/courses?id=${params.courseId}`);
+      const res = await fetch(`/api/courses?id=${params.courseId}`, {
+        credentials: "same-origin",
+      });
       const d = await res.json();
       if (cancelled) return;
       const mod = d.course?.modules?.find((m: { id: string }) => m.id === params.moduleId);
@@ -62,31 +69,54 @@ export default function QuizPage() {
   }, [params.courseId, params.moduleId]);
 
   async function submit() {
+    if (busy) return;
+    setBusy(true);
     let correct = 0;
     for (const q of questions) {
       if (answers[q.id] === q.correctIndex) correct++;
     }
     const score = Math.round((correct / Math.max(questions.length, 1)) * 100);
+    const ok = score >= PASS;
+    setPassed(ok);
 
-    if (isOfflineMode()) {
+    try {
       await queueEvent("QUIZ_ATTEMPT_CREATED", {
         courseId: params.courseId,
         quizModuleId: params.moduleId,
         quizScore: score,
       });
-      setResult(`Score ${score}% - enregistré hors ligne (sera synchronisé)`);
-    } else {
-      await fetch("/api/progress", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          courseId: params.courseId,
-          quizModuleId: params.moduleId,
-          quizScore: score,
-        }),
-      });
-      setResult(`Score ${score}%`);
-      router.refresh();
+
+      if (!isOfflineMode()) {
+        await fetch("/api/progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            courseId: params.courseId,
+            quizModuleId: params.moduleId,
+            quizScore: score,
+          }),
+        });
+        try {
+          await syncNow();
+        } catch {
+          /* ok */
+        }
+        setResult(
+          ok
+            ? `Score ${score}% — module validé (≥ ${PASS}%).`
+            : `Score ${score}% — minimum ${PASS}% requis pour le brevet.`,
+        );
+        router.refresh();
+      } else {
+        setResult(
+          ok
+            ? `Score ${score}% — enregistré hors ligne (sync auto).`
+            : `Score ${score}% — sous ${PASS}%, à retenter.`,
+        );
+      }
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -100,12 +130,13 @@ export default function QuizPage() {
           ← Retour
         </Link>
         <h1 className="font-display mt-4 text-2xl font-bold text-[var(--yk-forest)]">
-          Quiz - {title}
+          Quiz — {title}
         </h1>
+        <p className="mt-1 text-sm text-[var(--yk-muted)]">
+          Seuil brevet : ≥ {PASS}% sur chaque quiz du cours.
+        </p>
         {source === "pack" && (
-          <p className="mt-2 text-xs font-semibold text-sky-800">
-            Quiz depuis le pack hors ligne
-          </p>
+          <p className="mt-2 text-xs font-semibold text-sky-800">Pack hors ligne</p>
         )}
         <div className="mt-6 space-y-4">
           {questions.map((q) => (
@@ -113,7 +144,7 @@ export default function QuizPage() {
               <legend className="font-semibold">{q.prompt}</legend>
               <div className="mt-3 space-y-2">
                 {q.choices.map((c, i) => (
-                  <label key={c} className="flex items-center gap-2 text-sm">
+                  <label key={`${q.id}-${i}`} className="flex items-center gap-2 text-sm">
                     <input
                       type="radio"
                       name={q.id}
@@ -133,11 +164,24 @@ export default function QuizPage() {
           )}
         </div>
         {questions.length > 0 && (
-          <button type="button" onClick={submit} className="yk-btn yk-btn-primary mt-6">
-            Valider
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void submit()}
+            className="yk-btn yk-btn-primary mt-6"
+          >
+            {busy ? "…" : "Valider"}
           </button>
         )}
-        {result && <p className="mt-3 font-bold text-[var(--yk-forest)]">{result}</p>}
+        {result && (
+          <p
+            className={`mt-3 font-bold ${
+              passed ? "text-emerald-800" : "text-amber-800"
+            }`}
+          >
+            {result}
+          </p>
+        )}
       </div>
     </div>
   );

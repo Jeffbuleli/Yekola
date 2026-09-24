@@ -3,11 +3,16 @@
 import { useEffect } from "react";
 import { FORCE_KEY, listPending, syncNow } from "@/lib/sync/sync-manager";
 
-/** Sync silencieuse au retour réseau (sans bandeau UI). */
+/** Sync auto au montage, au retour réseau, et périodiquement. */
 export function SyncWatcher() {
   useEffect(() => {
-    async function onOnline() {
-      if (localStorage.getItem(FORCE_KEY) === "1") return;
+    let timer: ReturnType<typeof setInterval> | undefined;
+
+    async function flush() {
+      if (typeof localStorage !== "undefined" && localStorage.getItem(FORCE_KEY) === "1") {
+        return;
+      }
+      if (typeof navigator !== "undefined" && !navigator.onLine) return;
       const p = await listPending();
       if (p.length === 0) return;
       try {
@@ -16,8 +21,17 @@ export function SyncWatcher() {
         /* keep pending */
       }
     }
-    window.addEventListener("online", onOnline);
-    return () => window.removeEventListener("online", onOnline);
+
+    void flush();
+    window.addEventListener("online", flush);
+    window.addEventListener("focus", flush);
+    timer = setInterval(() => void flush(), 20_000);
+
+    return () => {
+      window.removeEventListener("online", flush);
+      window.removeEventListener("focus", flush);
+      if (timer) clearInterval(timer);
+    };
   }, []);
   return null;
 }

@@ -140,6 +140,8 @@ export type Certificate = {
   teacherName: string;
   skills: string[];
   issuedAt: string;
+  /** Moyenne des quiz (0–100), optionnel pour anciens certificats. */
+  overallQuizAverage?: number;
 };
 
 export type WalletTx = {

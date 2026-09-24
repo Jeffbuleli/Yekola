@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { newId } from "@/lib/auth/crypto";
 import { getDb, mutateDb } from "@/lib/db/store";
 import { enrollmentFor } from "@/lib/db/queries";
+import {
+  ensureProgressRow,
+  evaluateProgress,
+  QUIZ_PASS_THRESHOLD,
+  recomputeAndMaybeCertify,
+} from "@/lib/progress/certify";
 import type { Certificate } from "@/lib/types";
 
 export async function GET(req: Request) {
@@ -12,7 +17,17 @@ export async function GET(req: Request) {
   const db = getDb();
   if (courseId) {
     const p = db.progress.find((x) => x.userId === user.id && x.courseId === courseId);
-    return NextResponse.json({ progress: p ?? null });
+    const course = db.courses.find((c) => c.id === courseId);
+    const evald = course && p ? evaluateProgress(course, p) : null;
+    const cert = db.certificates.find(
+      (c) => c.userId === user.id && c.courseId === courseId,
+    );
+    return NextResponse.json({
+      progress: p ?? null,
+      evaluation: evald,
+      certificate: cert ?? null,
+      quizPassThreshold: QUIZ_PASS_THRESHOLD,
+    });
   }
   return NextResponse.json({
     progress: db.progress.filter((x) => x.userId === user.id),
@@ -36,66 +51,35 @@ export async function POST(req: Request) {
   const course = db.courses.find((c) => c.id === courseId);
   if (!course) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
-  const allLessons = course.modules.flatMap((m) => m.lessons.map((l) => l.id));
-
   let certificate: Certificate | null = null;
+  let evaluation = null as ReturnType<typeof evaluateProgress> | null;
 
   mutateDb((d) => {
-    let p = d.progress.find((x) => x.userId === user.id && x.courseId === courseId);
-    if (!p) {
-      p = {
-        id: newId("prg"),
-        userId: user.id,
-        courseId,
-        lessonId: null,
-        completedLessonIds: [],
-        quizScores: {},
-        percent: 0,
-        updatedAt: new Date().toISOString(),
-      };
-      d.progress.push(p);
-    }
+    const p = ensureProgressRow(d, user.id, courseId);
     if (lessonId && !p.completedLessonIds.includes(lessonId)) {
       p.completedLessonIds.push(lessonId);
     }
     if (quizModuleId != null && quizScore != null) {
-      p.quizScores[quizModuleId] = quizScore;
-    }
-    p.lessonId = lessonId ?? p.lessonId;
-    p.percent = Math.round((p.completedLessonIds.length / Math.max(allLessons.length, 1)) * 100);
-    p.updatedAt = new Date().toISOString();
-
-    if (p.percent >= 100) {
-      const existing = d.certificates.find(
-        (c) => c.userId === user.id && c.courseId === courseId,
-      );
-      if (!existing) {
-        const academy = d.academies.find((a) => a.id === course.academyId);
-        const teacher = academy
-          ? d.users.find((u) => u.id === academy.ownerId)
-          : null;
-        const code = `YK-${course.slug.slice(0, 8).toUpperCase()}-${user.id.slice(-4).toUpperCase()}`;
-        certificate = {
-          id: newId("crt"),
-          code,
-          userId: user.id,
-          courseId,
-          learnerName: user.name,
-          courseTitle: course.title,
-          academyName: academy?.name ?? "Yekola",
-          teacherName: teacher?.name ?? "Formateur",
-          skills: course.modules.map((m) => m.title),
-          issuedAt: new Date().toISOString().slice(0, 10),
-        };
-        d.certificates.push(certificate);
-      } else {
-        certificate = existing;
+      // Keep best score
+      const prev = p.quizScores[quizModuleId];
+      if (prev == null || quizScore > prev) {
+        p.quizScores[quizModuleId] = quizScore;
       }
     }
+    p.lessonId = lessonId ?? p.lessonId;
+    evaluation = evaluateProgress(course, p);
+    p.percent = evaluation.percent;
+    p.updatedAt = new Date().toISOString();
+    certificate = recomputeAndMaybeCertify({ d, user, course, progress: p });
   });
 
   const progress = getDb().progress.find(
     (x) => x.userId === user.id && x.courseId === courseId,
   );
-  return NextResponse.json({ progress, certificate });
+  return NextResponse.json({
+    progress,
+    evaluation,
+    certificate,
+    quizPassThreshold: QUIZ_PASS_THRESHOLD,
+  });
 }

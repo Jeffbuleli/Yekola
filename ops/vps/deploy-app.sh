@@ -17,7 +17,7 @@ if [[ "${1:-}" == "--on-server" ]]; then
     source "$REMOTE_DIR/web/.env"
     set +a
   fi
-  npm install
+  npm install --include=dev
   npm run build
   # Preserve user data / sessions across deploys (do not wipe store.json)
   mkdir -p "$REMOTE_DIR/web/data" "$REMOTE_DIR/web/.next/standalone/data"

@@ -2,6 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { getDb } from "@/lib/db/store";
 import { IconCheck } from "@/components/icons";
+import { buildCertificateHtml } from "@/lib/progress/certificate-html";
+
+export const dynamic = "force-dynamic";
 
 export default async function VerifyPage({
   params,
@@ -10,21 +13,20 @@ export default async function VerifyPage({
 }) {
   const { code } = await params;
   const db = getDb();
-  let cert = db.certificates.find((c) => c.code.toUpperCase() === code.toUpperCase());
+  const cert = db.certificates.find(
+    (c) => c.code.toUpperCase() === code.toUpperCase(),
+  );
 
-  if (!cert && code.toUpperCase() === "YK-WEB-2026-JM01") {
-    cert = {
-      id: "demo",
-      code: "YK-WEB-2026-JM01",
-      userId: "",
-      courseId: "",
-      learnerName: "Dan Muyumbu",
-      courseTitle: "Développement Web Moderne",
-      academyName: "Académie Patty",
-      teacherName: "Patty Basoga",
-      skills: ["Culture numérique", "HTML & CSS", "JavaScript", "Mise en ligne"],
-      issuedAt: "2026-09-20",
-    };
+  // Optional: embed QR preview via same builder fragment — download page has full print layout
+  let qrImg: string | null = null;
+  if (cert) {
+    try {
+      const html = await buildCertificateHtml(cert);
+      const m = html.match(/src="(data:image\/png;base64,[^"]+)"/);
+      qrImg = m?.[1] ?? null;
+    } catch {
+      qrImg = null;
+    }
   }
 
   return (
@@ -41,19 +43,27 @@ export default async function VerifyPage({
         </div>
         <div className="yk-card border-2 border-[var(--yk-forest)]/20 shadow-sm">
           <p className="text-xs font-bold uppercase tracking-wide text-[var(--yk-amber)]">
-            Certificat Yekola
+            Vérification employeur
           </p>
           {cert ? (
             <>
               <h1 className="font-display mt-2 text-2xl font-bold text-[var(--yk-forest)]">
-                Authentique
+                Brevet authentique
               </h1>
               <p className="mt-3 text-lg font-semibold text-[var(--yk-ink)]">
                 {cert.learnerName}
               </p>
               <p className="text-sm text-[var(--yk-muted)]">
-                a terminé <strong>{cert.courseTitle}</strong>
+                a validé <strong>{cert.courseTitle}</strong>
               </p>
+              {qrImg && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={qrImg}
+                  alt="QR vérification"
+                  className="mx-auto mt-4 h-36 w-36 rounded-xl border border-[var(--yk-line)] bg-white p-2"
+                />
+              )}
               <dl className="mt-5 space-y-2 text-sm">
                 <div className="flex justify-between gap-4">
                   <dt className="text-[var(--yk-muted)]">Code</dt>
@@ -61,7 +71,7 @@ export default async function VerifyPage({
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-[var(--yk-muted)]">Académie</dt>
-                  <dd className="font-semibold text-right">{cert.academyName}</dd>
+                  <dd className="text-right font-semibold">{cert.academyName}</dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-[var(--yk-muted)]">Formateur</dt>
@@ -71,6 +81,12 @@ export default async function VerifyPage({
                   <dt className="text-[var(--yk-muted)]">Date</dt>
                   <dd className="font-semibold">{cert.issuedAt}</dd>
                 </div>
+                {typeof cert.overallQuizAverage === "number" && (
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-[var(--yk-muted)]">Moyenne quiz</dt>
+                    <dd className="font-semibold">{cert.overallQuizAverage}%</dd>
+                  </div>
+                )}
               </dl>
               <p className="mt-4 text-sm font-semibold">Modules validés</p>
               <ul className="mt-1 flex flex-wrap gap-2">
@@ -84,12 +100,14 @@ export default async function VerifyPage({
                   </li>
                 ))}
               </ul>
-              <p className="mt-5 text-xs text-[var(--yk-muted)]">
-                Vérifiable sur yekola.mcbuleli.com ·{" "}
-                <a href={`/api/verify/${cert.code}`} className="underline">
-                  export JSON
-                </a>
-              </p>
+              <a
+                href={`/api/certificates/${encodeURIComponent(cert.code)}`}
+                className="yk-btn yk-btn-primary mt-5 w-full"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Ouvrir le brevet (PDF / impression)
+              </a>
             </>
           ) : (
             <>
