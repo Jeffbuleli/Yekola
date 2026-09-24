@@ -1,129 +1,103 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
-import { LEARNER, MODULES, PATH, PROJECT, SKILLS } from "@/lib/seed/demo-data";
-import { getProgress, queueEvent, setProgress } from "@/lib/sync/sync-manager";
+import { CourseCoverIcon } from "@/components/icons";
+import { getCurrentUser } from "@/lib/auth/session";
+import { userEnrollments } from "@/lib/db/queries";
+import { getDb } from "@/lib/db/store";
+import { LogoutButton } from "@/components/logout-button";
+import { OfflineReadyBadge } from "@/components/offline-ready-badge";
 
-export default function LearnDashboard() {
-  const [pathPct, setPathPct] = useState(42);
-  const [lessonPct, setLessonPct] = useState(65);
+export default async function LearnHubPage() {
+  const user = await getCurrentUser();
+  if (!user) redirect("/auth/login");
 
-  useEffect(() => {
-    (async () => {
-      const p = await getProgress<{ path?: number; lesson?: number }>("dashboard");
-      if (p?.path) setPathPct(p.path);
-      if (p?.lesson) setLessonPct(p.lesson);
-    })();
-  }, []);
-
-  async function continueLearning() {
-    await setProgress("dashboard", { path: pathPct, lesson: Math.min(100, lessonPct + 5) });
-    await queueEvent("PROGRESS_UPDATED", { lessonId: "les-js-functions", pct: lessonPct + 5 });
-  }
+  const items = userEnrollments(user.id);
+  const db = getDb();
+  const certificates = db.certificates.filter((c) => c.userId === user.id);
 
   return (
-    <div className="min-h-screen bg-[var(--yk-paper)] pb-16">
+    <div className="min-h-screen bg-[var(--yk-paper)]">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl space-y-5 px-4 py-6">
-        <div>
-          <p className="text-sm text-[var(--yk-muted)]">Bonjour, {LEARNER.name}</p>
-          <h1 className="font-display text-2xl font-bold text-[var(--yk-forest)]">
-            Continuer mon apprentissage
-          </h1>
+      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div>
+            <h1 className="font-display text-2xl font-bold text-[var(--yk-forest)] sm:text-3xl">
+              Mes cours
+            </h1>
+            <p className="mt-1 text-sm text-[var(--yk-muted)]">Bonjour {user.name}</p>
+          </div>
+          <div className="flex gap-2">
+            <Link href="/catalog" className="yk-btn yk-btn-primary !py-2 !text-xs">
+              Catalogue
+            </Link>
+            <LogoutButton />
+          </div>
         </div>
 
-        <section className="yk-card">
-          <p className="text-xs font-bold uppercase text-[var(--yk-amber)]">En cours</p>
-          <h2 className="font-display mt-1 text-lg font-bold">JavaScript - Functions</h2>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--yk-line)]">
-            <div
-              className="h-full rounded-full bg-[var(--yk-lime)]"
-              style={{ width: `${lessonPct}%` }}
-            />
-          </div>
-          <p className="mt-1 text-sm font-semibold text-[var(--yk-forest)]">{lessonPct}%</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link
-              href="/learn/lesson/les-js-functions"
-              className="yk-btn yk-btn-primary"
-              onClick={() => continueLearning()}
-            >
-              Continuer
-            </Link>
-            <Link href="/learn/quiz/js-functions" className="yk-btn yk-btn-ghost">
-              Quiz
-            </Link>
-          </div>
-        </section>
+        <div className="mt-8 space-y-3">
+          {items.map(({ enrollment, course }) => {
+            if (!course) return null;
+            const progress = db.progress.find(
+              (p) => p.userId === user.id && p.courseId === course.id,
+            );
+            const cert = certificates.find((c) => c.courseId === course.id);
+            return (
+              <Link
+                key={enrollment.id}
+                href={`/learn/${course.id}`}
+                className="yk-card block transition hover:border-[var(--yk-lime)]"
+              >
+                <div className="flex items-start gap-3">
+                  <CourseCoverIcon name={course.coverIcon} size={22} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-display text-lg font-bold leading-snug text-[var(--yk-forest)]">
+                        {course.title}
+                      </p>
+                      <OfflineReadyBadge courseId={course.id} />
+                      {cert && (
+                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-800">
+                          Certificat
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-2 text-sm text-[var(--yk-muted)]">
+                  Progression {progress?.percent ?? 0}% · Pack hors ligne{" "}
+                  {enrollment.offlinePackUnlocked ? "débloqué" : "verrouillé"}
+                </p>
+              </Link>
+            );
+          })}
+          {items.length === 0 && (
+            <p className="text-[var(--yk-muted)]">
+              Aucun cours acheté.{" "}
+              <Link href="/catalog" className="font-bold text-[var(--yk-teal)]">
+                Explorer le catalogue
+              </Link>
+            </p>
+          )}
+        </div>
 
-        <section className="yk-card">
-          <p className="text-xs font-bold uppercase text-[var(--yk-amber)]">Mon objectif</p>
-          <h2 className="font-display mt-1 text-lg font-bold">{LEARNER.goal}</h2>
-          <p className="text-sm text-[var(--yk-muted)]">{PATH.title}</p>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--yk-line)]">
-            <div
-              className="h-full rounded-full bg-[var(--yk-forest)]"
-              style={{ width: `${pathPct}%` }}
-            />
-          </div>
-          <p className="mt-1 text-sm font-semibold">{pathPct}%</p>
-          <Link href="/learn/path/developpeur-web" className="mt-3 inline-block text-sm font-bold text-[var(--yk-teal)]">
-            Voir le parcours →
-          </Link>
-        </section>
-
-        <section className="yk-card border-[var(--yk-mint)] bg-emerald-50/50">
-          <p className="text-xs font-bold uppercase text-[var(--yk-forest)]">Yekola AI</p>
-          <p className="mt-2 text-sm leading-relaxed">
-            Tu sembles avoir des difficultés avec les fonctions JavaScript. Faisons un exercice de 5
-            minutes ?
-          </p>
-          <Link href="/learn/ai" className="yk-btn yk-btn-secondary mt-3 !text-sm">
-            Parler au tuteur
-          </Link>
-        </section>
-
-        <section className="yk-card">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display font-bold">Mes compétences</h2>
-            <Link href="/learn/skills" className="text-sm font-bold text-[var(--yk-teal)]">
-              Passeport
-            </Link>
-          </div>
-          <ul className="mt-3 space-y-2">
-            {SKILLS.map((s) => (
-              <li key={s.id} className="flex items-center justify-between text-sm">
-                <span className="font-medium">{s.label}</span>
-                <span>
-                  {s.status === "validated" ? "✓" : s.status === "progress" ? "◐" : "○"}{" "}
-                  {s.score}%
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="yk-card">
-          <h2 className="font-display font-bold">Mon projet</h2>
-          <p className="mt-1 text-sm text-[var(--yk-muted)]">{PROJECT.title}</p>
-          <Link href={`/learn/project/${PROJECT.id}`} className="yk-btn yk-btn-ghost mt-3 !text-sm">
-            Ouvrir le brief
-          </Link>
-        </section>
-
-        <section className="yk-card">
-          <h2 className="font-display font-bold">Modules</h2>
-          <ol className="mt-3 space-y-2 text-sm">
-            {MODULES.map((m) => (
-              <li key={m.id} className="flex gap-2">
-                <span className="font-bold text-[var(--yk-amber)]">{m.order}.</span>
-                <span>{m.title}</span>
-              </li>
-            ))}
-          </ol>
-        </section>
+        {certificates.length > 0 && (
+          <section className="mt-10">
+            <h2 className="font-display text-xl font-bold text-[var(--yk-forest)]">
+              Mes certificats
+            </h2>
+            <ul className="mt-3 space-y-2">
+              {certificates.map((c) => (
+                <li key={c.id} className="yk-card text-sm">
+                  <strong>{c.courseTitle}</strong> · {c.issuedAt} ·{" "}
+                  <Link href={`/verify/${c.code}`} className="font-bold text-[var(--yk-teal)]">
+                    Vérifier {c.code}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </main>
     </div>
   );

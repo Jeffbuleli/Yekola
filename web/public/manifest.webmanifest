@@ -1,7 +1,7 @@
 {
   "name": "Yekola",
   "short_name": "Yekola",
-  "description": "Apprendre. Pratiquer. Prouver. Formation pro avec ou sans Internet.",
+  "description": "Créez. Vendez. Apprenez hors ligne. Formations avec pack offline après achat.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f4f7f5",

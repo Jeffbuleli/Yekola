@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CERTIFICATE } from "@/lib/seed/demo-data";
+import { getDb } from "@/lib/db/store";
+import { IconCheck } from "@/components/icons";
 
 export default async function VerifyPage({
   params,
@@ -8,7 +9,23 @@ export default async function VerifyPage({
   params: Promise<{ code: string }>;
 }) {
   const { code } = await params;
-  const valid = code.toUpperCase() === CERTIFICATE.code.toUpperCase();
+  const db = getDb();
+  let cert = db.certificates.find((c) => c.code.toUpperCase() === code.toUpperCase());
+
+  if (!cert && code.toUpperCase() === "YK-WEB-2026-JM01") {
+    cert = {
+      id: "demo",
+      code: "YK-WEB-2026-JM01",
+      userId: "",
+      courseId: "",
+      learnerName: "Patty Basoga",
+      courseTitle: "Développement Web Moderne",
+      academyName: "Académie Jeff",
+      teacherName: "Jeff Buleli",
+      skills: ["Culture numérique", "HTML & CSS", "JavaScript", "Mise en ligne"],
+      issuedAt: "2026-09-20",
+    };
+  }
 
   return (
     <div className="min-h-screen bg-[var(--yk-paper)]">
@@ -22,52 +39,57 @@ export default async function VerifyPage({
             className="h-9 w-auto"
           />
         </div>
-        <div className="yk-card">
-          <p className="text-xs font-bold uppercase text-[var(--yk-amber)]">
-            Vérification certificat
+        <div className="yk-card border-2 border-[var(--yk-forest)]/20 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wide text-[var(--yk-amber)]">
+            Certificat Yekola
           </p>
-          {valid ? (
+          {cert ? (
             <>
               <h1 className="font-display mt-2 text-2xl font-bold text-[var(--yk-forest)]">
-                Certificat authentique
+                Authentique
               </h1>
-              <dl className="mt-4 space-y-2 text-sm">
+              <p className="mt-3 text-lg font-semibold text-[var(--yk-ink)]">
+                {cert.learnerName}
+              </p>
+              <p className="text-sm text-[var(--yk-muted)]">
+                a terminé <strong>{cert.courseTitle}</strong>
+              </p>
+              <dl className="mt-5 space-y-2 text-sm">
                 <div className="flex justify-between gap-4">
                   <dt className="text-[var(--yk-muted)]">Code</dt>
-                  <dd className="font-semibold">{CERTIFICATE.code}</dd>
+                  <dd className="font-mono font-semibold">{cert.code}</dd>
                 </div>
                 <div className="flex justify-between gap-4">
-                  <dt className="text-[var(--yk-muted)]">Apprenant</dt>
-                  <dd className="font-semibold">{CERTIFICATE.learnerName}</dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-[var(--yk-muted)]">Formation</dt>
-                  <dd className="font-semibold text-right">{CERTIFICATE.pathTitle}</dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-[var(--yk-muted)]">Organisme</dt>
-                  <dd className="font-semibold text-right">{CERTIFICATE.orgName}</dd>
+                  <dt className="text-[var(--yk-muted)]">Académie</dt>
+                  <dd className="font-semibold text-right">{cert.academyName}</dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-[var(--yk-muted)]">Formateur</dt>
-                  <dd className="font-semibold">{CERTIFICATE.instructorName}</dd>
+                  <dd className="font-semibold">{cert.teacherName}</dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-[var(--yk-muted)]">Date</dt>
-                  <dd className="font-semibold">{CERTIFICATE.issuedAt}</dd>
+                  <dd className="font-semibold">{cert.issuedAt}</dd>
                 </div>
               </dl>
-              <p className="mt-4 text-sm font-semibold">Compétences</p>
+              <p className="mt-4 text-sm font-semibold">Modules validés</p>
               <ul className="mt-1 flex flex-wrap gap-2">
-                {CERTIFICATE.skills.map((s) => (
+                {cert.skills.map((s) => (
                   <li
                     key={s}
-                    className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-[var(--yk-forest)]"
+                    className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-[var(--yk-forest)]"
                   >
-                    ✓ {s}
+                    <IconCheck size={12} className="text-[var(--yk-lime)]" />
+                    {s}
                   </li>
                 ))}
               </ul>
+              <p className="mt-5 text-xs text-[var(--yk-muted)]">
+                Vérifiable sur yekola.mcbuleli.com ·{" "}
+                <a href={`/api/verify/${cert.code}`} className="underline">
+                  export JSON
+                </a>
+              </p>
             </>
           ) : (
             <>
@@ -75,7 +97,7 @@ export default async function VerifyPage({
                 Certificat introuvable
               </h1>
               <p className="mt-2 text-sm text-[var(--yk-muted)]">
-                Code « {code} » non reconnu. Essayez {CERTIFICATE.code}.
+                Code « {code} » non reconnu.
               </p>
             </>
           )}

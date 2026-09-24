@@ -41,18 +41,33 @@ body {
   padding: 1rem 1.1rem;
 }
 
+@media (min-width: 768px) {
+  .yk-card {
+    padding: 1.15rem 1.25rem;
+  }
+}
+
 .yk-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  padding: 0.75rem 1.15rem;
+  min-height: 2.75rem;
+  padding: 0.7rem 1.1rem;
   border-radius: 0.65rem;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.92rem;
   text-decoration: none;
   border: 1px solid transparent;
+  touch-action: manipulation;
+}
+
+@media (min-width: 1024px) {
+  .yk-btn {
+    min-height: 2.85rem;
+    padding: 0.75rem 1.25rem;
+  }
 }
 
 .yk-btn-primary {
@@ -69,4 +84,61 @@ body {
   background: transparent;
   border-color: var(--yk-line);
   color: var(--yk-forest);
+}
+
+/* Shell: mobile = stack, tablet = 2 cols, desk = wide */
+.yk-shell {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .yk-shell {
+    padding-inline: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .yk-shell {
+    padding-inline: 2rem;
+  }
+}
+
+.yk-prose-lesson h2 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--yk-forest);
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.yk-prose-lesson h3 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--yk-teal);
+  margin-top: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.yk-prose-lesson p,
+.yk-prose-lesson li {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--yk-ink);
+}
+
+@media (min-width: 768px) {
+  .yk-prose-lesson p,
+  .yk-prose-lesson li {
+    font-size: 1rem;
+  }
+}
+
+.yk-prose-lesson ul {
+  margin: 0.5rem 0 0.75rem 1.1rem;
+  list-style: disc;
 }

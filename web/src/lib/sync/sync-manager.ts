@@ -1,14 +1,11 @@
 /**
- * SyncManager - file d'attente offline crédible (IndexedDB).
- * Conçu pour évoluer vers un Learning Hub physique.
+ * SyncManager — packs cours + file d'attente hors ligne (IndexedDB).
  */
 
 export type SyncEventType =
   | "LESSON_COMPLETED"
   | "QUIZ_ATTEMPT_CREATED"
-  | "PROJECT_SUBMITTED"
-  | "PROGRESS_UPDATED"
-  | "AI_HINT_VIEWED";
+  | "PROGRESS_UPDATED";
 
 export type SyncEvent = {
   id: string;
@@ -20,20 +17,53 @@ export type SyncEvent = {
 
 export type ConnectivityMode = "online" | "syncing" | "offline";
 
-const DB_NAME = "yekola-hub";
-const STORE = "sync_queue";
-const PROGRESS = "progress";
+export type OfflinePack = {
+  version: number;
+  courseId: string;
+  slug: string;
+  title: string;
+  downloadedAt: string;
+  modules: Array<{
+    id: string;
+    title: string;
+    lessons: Array<{
+      id: string;
+      title: string;
+      minutes: number;
+      body: string;
+      order: number;
+    }>;
+    quiz: Array<{
+      id: string;
+      prompt: string;
+      choices: string[];
+      correctIndex: number;
+      explanation: string;
+    }>;
+  }>;
+};
+
+const DB_NAME = "yekola-offline";
+const DB_VERSION = 2;
+const STORE_SYNC = "sync_queue";
+const STORE_META = "meta";
+const STORE_PACKS = "packs";
+
+const FORCE_KEY = "yekola_force_offline";
 
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
       const db = req.result;
-      if (!db.objectStoreNames.contains(STORE)) {
-        db.createObjectStore(STORE, { keyPath: "id" });
+      if (!db.objectStoreNames.contains(STORE_SYNC)) {
+        db.createObjectStore(STORE_SYNC, { keyPath: "id" });
       }
-      if (!db.objectStoreNames.contains(PROGRESS)) {
-        db.createObjectStore(PROGRESS, { keyPath: "key" });
+      if (!db.objectStoreNames.contains(STORE_META)) {
+        db.createObjectStore(STORE_META, { keyPath: "key" });
+      }
+      if (!db.objectStoreNames.contains(STORE_PACKS)) {
+        db.createObjectStore(STORE_PACKS, { keyPath: "courseId" });
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -43,6 +73,16 @@ function openDb(): Promise<IDBDatabase> {
 
 function uid() {
   return `evt_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+}
+
+export function isForcedOffline(): boolean {
+  if (typeof localStorage === "undefined") return false;
+  return localStorage.getItem(FORCE_KEY) === "1";
+}
+
+export function isOfflineMode(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return isForcedOffline() || !navigator.onLine;
 }
 
 export async function queueEvent(
@@ -58,8 +98,8 @@ export async function queueEvent(
   };
   const db = await openDb();
   await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE, "readwrite");
-    tx.objectStore(STORE).put(event);
+    const tx = db.transaction(STORE_SYNC, "readwrite");
+    tx.objectStore(STORE_SYNC).put(event);
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
@@ -70,8 +110,8 @@ export async function queueEvent(
 export async function listPending(): Promise<SyncEvent[]> {
   const db = await openDb();
   const all = await new Promise<SyncEvent[]>((resolve, reject) => {
-    const tx = db.transaction(STORE, "readonly");
-    const req = tx.objectStore(STORE).getAll();
+    const tx = db.transaction(STORE_SYNC, "readonly");
+    const req = tx.objectStore(STORE_SYNC).getAll();
     req.onsuccess = () => resolve(req.result as SyncEvent[]);
     req.onerror = () => reject(req.error);
   });
@@ -79,23 +119,11 @@ export async function listPending(): Promise<SyncEvent[]> {
   return all.filter((e) => e.status === "pending");
 }
 
-export async function getAllEvents(): Promise<SyncEvent[]> {
-  const db = await openDb();
-  const all = await new Promise<SyncEvent[]>((resolve, reject) => {
-    const tx = db.transaction(STORE, "readonly");
-    const req = tx.objectStore(STORE).getAll();
-    req.onsuccess = () => resolve(req.result as SyncEvent[]);
-    req.onerror = () => reject(req.error);
-  });
-  db.close();
-  return all;
-}
-
 export async function markSynced(ids: string[]) {
   const db = await openDb();
   await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE, "readwrite");
-    const store = tx.objectStore(STORE);
+    const tx = db.transaction(STORE_SYNC, "readwrite");
+    const store = tx.objectStore(STORE_SYNC);
     for (const id of ids) {
       const getReq = store.get(id);
       getReq.onsuccess = () => {
@@ -115,8 +143,8 @@ export async function markSynced(ids: string[]) {
 export async function setProgress(key: string, value: unknown) {
   const db = await openDb();
   await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(PROGRESS, "readwrite");
-    tx.objectStore(PROGRESS).put({ key, value, updatedAt: new Date().toISOString() });
+    const tx = db.transaction(STORE_META, "readwrite");
+    tx.objectStore(STORE_META).put({ key, value, updatedAt: new Date().toISOString() });
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
@@ -126,8 +154,8 @@ export async function setProgress(key: string, value: unknown) {
 export async function getProgress<T>(key: string): Promise<T | null> {
   const db = await openDb();
   const row = await new Promise<{ value: T } | undefined>((resolve, reject) => {
-    const tx = db.transaction(PROGRESS, "readonly");
-    const req = tx.objectStore(PROGRESS).get(key);
+    const tx = db.transaction(STORE_META, "readonly");
+    const req = tx.objectStore(STORE_META).get(key);
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
@@ -135,9 +163,78 @@ export async function getProgress<T>(key: string): Promise<T | null> {
   return row ? row.value : null;
 }
 
-/** Sync vers cloud (API). Idempotent par event.id. */
+export async function savePack(pack: OfflinePack): Promise<void> {
+  const db = await openDb();
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(STORE_PACKS, "readwrite");
+    tx.objectStore(STORE_PACKS).put(pack);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+  db.close();
+  localStorage.setItem(`yekola_pack_${pack.courseId}`, "1");
+}
+
+export async function getPack(courseId: string): Promise<OfflinePack | null> {
+  const db = await openDb();
+  const row = await new Promise<OfflinePack | undefined>((resolve, reject) => {
+    const tx = db.transaction(STORE_PACKS, "readonly");
+    const req = tx.objectStore(STORE_PACKS).get(courseId);
+    req.onsuccess = () => resolve(req.result as OfflinePack | undefined);
+    req.onerror = () => reject(req.error);
+  });
+  db.close();
+  return row ?? null;
+}
+
+export async function hasPack(courseId: string): Promise<boolean> {
+  const p = await getPack(courseId);
+  return !!p;
+}
+
+export async function listPackCourseIds(): Promise<string[]> {
+  const db = await openDb();
+  const all = await new Promise<OfflinePack[]>((resolve, reject) => {
+    const tx = db.transaction(STORE_PACKS, "readonly");
+    const req = tx.objectStore(STORE_PACKS).getAll();
+    req.onsuccess = () => resolve(req.result as OfflinePack[]);
+    req.onerror = () => reject(req.error);
+  });
+  db.close();
+  return all.map((p) => p.courseId);
+}
+
+export async function getLessonFromPack(
+  courseId: string,
+  lessonId: string,
+): Promise<{ title: string; body: string; minutes: number; courseTitle: string } | null> {
+  const pack = await getPack(courseId);
+  if (!pack) return null;
+  for (const m of pack.modules) {
+    const les = m.lessons.find((l) => l.id === lessonId);
+    if (les) {
+      return {
+        title: les.title,
+        body: les.body,
+        minutes: les.minutes,
+        courseTitle: pack.title,
+      };
+    }
+  }
+  return null;
+}
+
+export async function getQuizFromPack(courseId: string, moduleId: string) {
+  const pack = await getPack(courseId);
+  if (!pack) return null;
+  const mod = pack.modules.find((m) => m.id === moduleId);
+  if (!mod) return null;
+  return { title: mod.title, quiz: mod.quiz };
+}
+
+/** Sync vers cloud. Idempotent par event.id. Applique aussi la progression serveur. */
 export async function syncNow(): Promise<{ synced: number; mode: ConnectivityMode }> {
-  if (typeof navigator !== "undefined" && !navigator.onLine) {
+  if (isOfflineMode()) {
     return { synced: 0, mode: "offline" };
   }
   const pending = await listPending();
@@ -161,3 +258,5 @@ export function detectMode(pendingCount: number, forcedOffline?: boolean): Conne
   if (pendingCount > 0) return "syncing";
   return "online";
 }
+
+export { FORCE_KEY };

@@ -1,12 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { ConnectivityBar } from "@/components/connectivity-bar";
 import { RegisterSW } from "@/components/register-sw";
+import { SyncWatcher } from "@/components/sync-watcher";
 
 export const metadata: Metadata = {
-  title: "Yekola - Apprendre. Pratiquer. Prouver.",
+  title: {
+    default: "Yekola - Créez. Vendez. Apprenez hors ligne.",
+    template: "%s · Yekola",
+  },
   description:
-    "Infrastructure de formation professionnelle intelligente, conçue pour fonctionner avec ou sans Internet en RDC et en Afrique.",
+    "Les formateurs s’abonnent pour publier leurs cours. Les apprenants achètent un cours et peuvent l’apprendre hors ligne après l’achat.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "Yekola" },
 };
@@ -29,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="antialiased" style={{ fontFamily: "Manrope, system-ui, sans-serif" }}>
-        <ConnectivityBar />
+        <SyncWatcher />
         <RegisterSW />
         {children}
       </body>

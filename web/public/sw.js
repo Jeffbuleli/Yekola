@@ -1,12 +1,10 @@
-/* Yekola PWA - cache shell + brand + pages démo (pas tout aveuglément). */
-const CACHE = "yekola-shell-v1";
+/* Yekola PWA — shell + brand + pages apprenant (cache réseau). */
+const CACHE = "yekola-shell-v2";
 const PRECACHE = [
   "/",
-  "/demo",
+  "/catalog",
   "/learn",
-  "/learn/lesson/les-js-functions",
-  "/learn/quiz/js-functions",
-  "/learn/skills",
+  "/auth/login",
   "/brand/yekola-mark.png",
   "/brand/yekola-wordmark.png",
   "/manifest.webmanifest",
@@ -20,9 +18,10 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))),
-    ).then(() => self.clients.claim()),
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim()),
   );
 });
 
@@ -36,7 +35,7 @@ self.addEventListener("fetch", (event) => {
     caches.match(req).then((cached) => {
       const network = fetch(req)
         .then((res) => {
-          if (res.ok && (url.origin === self.location.origin)) {
+          if (res.ok && url.origin === self.location.origin) {
             const copy = res.clone();
             caches.open(CACHE).then((cache) => cache.put(req, copy));
           }

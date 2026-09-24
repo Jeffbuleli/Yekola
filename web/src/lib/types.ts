@@ -1,0 +1,170 @@
+export type UserRole = "teacher" | "learner" | "admin";
+
+export type PlanId = "free" | "base" | "pro" | "max";
+
+export type User = {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  passwordHash: string;
+  academyId: string | null;
+  createdAt: string;
+};
+
+export type Academy = {
+  id: string;
+  slug: string;
+  name: string;
+  ownerId: string;
+  city: string;
+  bio: string;
+  planId: PlanId;
+  subscriptionStatus: "active" | "trialing" | "past_due" | "canceled";
+  subscriptionExpiresAt: string | null;
+  walletBalanceCdf: number;
+  createdAt: string;
+};
+
+export type Lesson = {
+  id: string;
+  title: string;
+  minutes: number;
+  body: string;
+  order: number;
+};
+
+export type QuizQuestion = {
+  id: string;
+  prompt: string;
+  choices: string[];
+  correctIndex: number;
+  explanation: string;
+};
+
+export type CourseModule = {
+  id: string;
+  title: string;
+  summary: string;
+  order: number;
+  lessons: Lesson[];
+  quiz: QuizQuestion[];
+};
+
+export type Course = {
+  id: string;
+  academyId: string;
+  slug: string;
+  title: string;
+  tagline: string;
+  description: string;
+  /** Prix du cours en francs congolais. */
+  priceCdf: number;
+  currency: "CDF";
+  status: "draft" | "published";
+  modules: CourseModule[];
+  /** Clé d'icône SVG : code | wallet | store | book */
+  coverIcon: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Enrollment = {
+  id: string;
+  userId: string;
+  courseId: string;
+  academyId: string;
+  amountPaidCdf: number;
+  platformFeeCdf: number;
+  teacherNetCdf: number;
+  paymentRef: string;
+  paymentProvider: string;
+  offlinePackUnlocked: boolean;
+  purchasedAt: string;
+};
+
+export type ProgressRecord = {
+  id: string;
+  userId: string;
+  courseId: string;
+  lessonId: string | null;
+  completedLessonIds: string[];
+  quizScores: Record<string, number>;
+  percent: number;
+  updatedAt: string;
+};
+
+export type Certificate = {
+  id: string;
+  code: string;
+  userId: string;
+  courseId: string;
+  learnerName: string;
+  courseTitle: string;
+  academyName: string;
+  teacherName: string;
+  skills: string[];
+  issuedAt: string;
+};
+
+export type WalletTx = {
+  id: string;
+  academyId: string;
+  type: "sale" | "subscription" | "withdrawal" | "fee";
+  amountCdf: number;
+  description: string;
+  reference: string;
+  createdAt: string;
+};
+
+export type SubscriptionPayment = {
+  id: string;
+  academyId: string;
+  planId: PlanId;
+  amountCdf: number;
+  provider: string;
+  reference: string;
+  status: "demo" | "pending" | "paid" | "failed";
+  createdAt: string;
+};
+
+export type PaymentKind = "course_purchase" | "teacher_subscription" | "withdrawal";
+
+export type PaymentIntent = {
+  id: string;
+  reference: string;
+  kind: PaymentKind;
+  status: "demo" | "pending" | "paid" | "failed";
+  amountCdf: number;
+  currency: "CDF";
+  msisdn: string | null;
+  momoProvider: string | null;
+  userId: string;
+  courseId: string | null;
+  academyId: string | null;
+  planId: PlanId | null;
+  provider: string;
+  message: string;
+  createdAt: string;
+  updatedAt: string;
+  fulfilledAt: string | null;
+};
+
+export type SyncAccepted = {
+  id: string;
+  acceptedAt: string;
+};
+
+export type DbShape = {
+  seedVersion: number;
+  users: User[];
+  academies: Academy[];
+  courses: Course[];
+  enrollments: Enrollment[];
+  progress: ProgressRecord[];
+  certificates: Certificate[];
+  walletTx: WalletTx[];
+  subscriptions: SubscriptionPayment[];
+  payments: PaymentIntent[];
+  syncAccepted: SyncAccepted[];
+};

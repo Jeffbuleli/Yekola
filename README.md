@@ -1,17 +1,33 @@
 # Yekola
 
-École virtuelle offline-first pour la formation professionnelle en zones à faible connectivité.
+**Créez. Vendez. Apprenez — même hors ligne.**
 
-**Yekola partout. Même sans Internet.**
+SaaS multi-tenant : les enseignants s’abonnent pour publier leurs cours ; les apprenants achètent chaque cours et peuvent apprendre hors ligne après l’achat.
 
-- Produit : [`docs/PRODUCT.md`](docs/PRODUCT.md)
-- Brand : [`brand/`](brand/)
-- Hébergement : [`ops/HOST.md`](ops/HOST.md)
 - Site : https://yekola.mcbuleli.com
-- GitHub : https://github.com/Jeffbuleli/Yekola
+- App : `web/` (Next.js 15)
+- Produit : `docs/PRODUCT.md`
+- Deploy : `bash ops/vps/deploy-app.sh`
 
-## Stack prévue
-Next.js · Postgres · PWA offline packs · McBuleli Meet (Jitsi) · Mobile Money (abonnements centres)
+## Démarrage local
 
-## Status
-Fondations brand + brief produit. App à builder.
+```bash
+cd web
+cp .env.example .env
+npm install
+npm run dev
+```
+
+Comptes démo (seed) :
+
+- Enseignant : `jeff@yekola.demo` / `yekola2026`
+- Apprenant : `patty@yekola.demo` / `yekola2026`
+
+## Tarifs enseignants (FC)
+
+| Plan | Prix / mois |
+|------|-------------|
+| Free | 0 FC |
+| Base | 1 000 FC |
+| Pro | 1 500 FC |
+| Max | 2 000 FC |

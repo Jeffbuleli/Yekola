@@ -17,9 +17,11 @@ if [[ "${1:-}" == "--on-server" ]]; then
     source "$REMOTE_DIR/web/.env"
     set +a
   fi
-  npm install --omit=dev
+  npm install
   npm run build
-  mkdir -p "$REMOTE_DIR/web/.next/standalone/public"
+  # Force reseed Jeff/Patty + tarifs FC si ancienne DB
+  rm -f "$REMOTE_DIR/web/data/store.json" "$REMOTE_DIR/web/.next/standalone/data/store.json" 2>/dev/null || true
+  mkdir -p "$REMOTE_DIR/web/data" "$REMOTE_DIR/web/.next/standalone/data"
   cp -a "$REMOTE_DIR/web/public/." "$REMOTE_DIR/web/.next/standalone/public/" || true
   cp -a "$REMOTE_DIR/web/.next/static" "$REMOTE_DIR/web/.next/standalone/.next/" || true
 
