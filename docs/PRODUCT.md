@@ -1,106 +1,74 @@
-# Yekola — SaaS créateurs + apprentissage offline
+# Yekola — SaaS formation professionnelle + apprentissage offline
 
-**Slogan :** Créez. Vendez. Apprenez — même hors ligne.  
+**Slogan :** Apprenez un métier — même hors ligne.  
 **Domaine :** https://yekola.mcbuleli.com  
+**Challenge VUK’AFRIK :** #7 E-learning avec mode hors-ligne  
 **Repo :** Jeffbuleli/Yekola
 
 ---
 
 ## 1. Problème
 
-Les formateurs en Afrique veulent vendre leurs formations en ligne (Mobile Money), sans être développeurs.  
-Les apprenants veulent acheter un cours et continuer à apprendre quand le réseau tombe.
+Accès limité à la **formation professionnelle** en zones à **faible connectivité**.  
+Les jeunes commencent un module ; le réseau tombe ; le cours est perdu.  
+Les plateformes classiques exigent une connexion continue.
 
 ---
 
 ## 2. Solution
 
-**Yekola** est une plateforme multi-tenant où :
+**Yekola** : plateforme de cours **téléchargeables et suivables hors ligne**.
 
-1. **L’enseignant** paie un **abonnement mensuel** pour publier et gérer son académie.
-2. **L’apprenant** **achète chaque cours** pour y accéder.
-3. Après achat, l’apprenant peut **télécharger le pack** et apprendre **hors ligne**, puis synchroniser sa progression au reconnect.
+1. Le formateur / centre FP s’abonne et publie (après validation admin).
+2. L’apprenant **achète** le cours (Mobile Money).
+3. Après achat : **pack hors ligne** (leçons + quiz + sync au reconnect).
 
 ```
-Enseignant → Abonnement → Académie (tenant)
-                          └─ Cours publiés (prix, modules, quiz)
-Apprenant  → Achat cours → Accès + pack offline + progression
+Centre / enseignant → Abonnement → Académie
+Apprenant FP        → Achat MoMo → Pack offline → Métier
 ```
 
 ---
 
-## 3. Qui paie quoi
+## 3. Cible
+
+- Étudiants et jeunes en **formation professionnelle**
+- Formateurs / centres qui veulent publier sans être développeurs
+- Paiement local : Orange Money, Airtel Money, etc.
+
+---
+
+## 4. Qui paie quoi
 
 | Acteur | Paiement | Contrepartie |
 |--------|----------|--------------|
-| Enseignant / académie | Abonnement mensuel | Publier des cours, encaisser les ventes |
-| Apprenant | Prix du cours (une fois) | Accès + téléchargement offline |
-| Plateforme | Commission sur ventes (selon plan) | Hébergement, paiements, sync |
-
-### Grille abonnements enseignants (test MoMo — FC)
-
-| Plan | Prix / mois | Cours actifs | Apprenants | Commission ventes |
-|------|-------------|--------------|------------|-------------------|
-| **Free** | **0 FC** | 1 | 15 | 20 % |
-| **Base** | **1 000 FC** | 3 | 50 | 10 % |
-| **Pro** | **1 500 FC** | 10 | 200 | 5 % |
-| **Max** | **2 000 FC** | Illimité | Illimité | 0 % |
+| Enseignant / centre | Abo mensuel (0–2 000 FC) | Publier, encaisser |
+| Apprenant | Prix du cours | Accès + pack offline |
+| Yekola | Commission selon plan | Hébergement, MoMo, sync |
 
 ---
 
-## 4. Différenciateur
+## 5. Différenciateur
 
-**Offline après achat** : le contenu acheté reste utilisable sans Internet (leçons, quiz, file de sync).  
-Ce n’est pas un simple PDF : progression, quiz et sync au retour du réseau.
+**Offline après achat** : pas un PDF WhatsApp — progression, quiz, sync, certificat.
 
----
-
-## 5. Rôles
-
-- `teacher` — propriétaire d’une académie, abonnement, studio, wallet
-- `learner` — catalogue, achat, mes cours, offline
-- `admin` — ops plateforme
+Face à 10 groupes sur le même sujet : **offline profond × MoMo CDF**.
 
 ---
 
-## Modules produit
+## 6. Comptes démo (`yekola2026`)
 
-### MVP
-- Landing + tarifs enseignants (FC)
-- Auth + académie (tenant)
-- Studio cours, catalogue, achat
-- Pack hors ligne post-achat + sync
-- Wallet enseignant + Mobile Money (démo / PawaPay)
-- Certificats vérifiables `/verify/{code}`
-- Analytics enseignant (ventes, progression, certificats)
-- Meet audio optionnel (McBuleli Live) par cours
-- IA opt-in (tuteur apprenant + assistant studio)
+| Rôle | Email |
+|------|--------|
+| Apprenant | dan@yekola.demo |
+| Enseignant | patty@yekola.demo |
+| Admin | jeff@yekola.demo |
 
-### Suite
-- Branding académie (logo, couleurs)
-- Coupons / codes promo
-- Domaine personnalisé (plan Max)
+## 7. Pitch (phrase-pilier)
 
----
+> Yekola permet à un jeune en formation professionnelle d’acheter un cours en Mobile Money, de le télécharger, et de continuer à apprendre quand le réseau tombe — pendant que son formateur monétise son académie.
 
-## 7. Architecture (résumé)
+## 8. Slides jury
 
-```
-yekola.mcbuleli.com
-  ├─ /                 landing
-  ├─ /catalog          cours publics
-  ├─ /studio           enseignant
-  ├─ /learn            apprenant (achetés + offline)
-  ├─ /verify/[code]    certificats
-  └─ API               auth, courses, payments, sync, offline packs
-```
-
-Hébergement : VPS `162.35.181.98` — voir `ops/HOST.md`.
-
----
-
-## 8. Pitch (30 s)
-
-> Sur Yekola, les formateurs s’abonnent pour publier leurs cours et encaisser via Mobile Money.  
-> Les apprenants achètent un cours et peuvent l’apprendre hors ligne après l’achat.  
-> *Créez. Vendez. Apprenez — même hors ligne.*
+Pilotage : https://e-avec.org/mc · Diffusion : https://e-avec.org/live  
+Produit : https://yekola.mcbuleli.com

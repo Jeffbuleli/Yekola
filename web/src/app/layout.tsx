@@ -5,11 +5,11 @@ import { SyncWatcher } from "@/components/sync-watcher";
 
 export const metadata: Metadata = {
   title: {
-    default: "Yekola - Créez. Vendez. Apprenez hors ligne.",
+    default: "Yekola - Formation professionnelle hors ligne.",
     template: "%s · Yekola",
   },
   description:
-    "Les formateurs s’abonnent pour publier leurs cours. Les apprenants achètent un cours et peuvent l’apprendre hors ligne après l’achat.",
+    "Cours téléchargeables pour la formation professionnelle en zones à faible connectivité. Mobile Money natif.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "Yekola" },
 };

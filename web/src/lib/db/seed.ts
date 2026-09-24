@@ -1,7 +1,7 @@
 import { hashPassword, newId } from "@/lib/auth/crypto";
 import type { Academy, Course, DbShape, User } from "@/lib/types";
 
-export const SEED_VERSION = 5;
+export const SEED_VERSION = 6;
 const DEMO_PASSWORD = "yekola2026";
 
 export function buildSeed(): DbShape {
@@ -530,15 +530,220 @@ Volumes par opérateur, frais estimés, incidents. Une demi-page suffit.`,
     ],
   };
 
-  const courseWhatsapp: Course = {
+  const courseFp: Course = {
     id: newId("crs"),
     academyId,
-    slug: "vente-whatsapp-artisans",
-    title: "Vente WhatsApp pour artisans",
-    tagline: "Catalogue, devis et fidélisation sur le canal le plus utilisé",
+    slug: "electricite-base-apprentis",
+    title: "Électricité de base pour apprentis",
+    tagline: "Sécurité, circuits simples et premiers dépannages en atelier",
     description:
-      "Transformez WhatsApp en vitrine pro : profil, catalogue photos, devis clairs, relances et paiements MoMo. Trois modules progressifs avec quiz.",
-    priceCdf: 750,
+      "Parcours formation professionnelle : sécurité électrique, outils, circuits simples et bonnes pratiques atelier. Conçu pour apprentis en zone à faible connectivité - pack hors ligne après achat.",
+    priceCdf: 800,
+    currency: "CDF",
+    status: "published",
+    reviewNote: null,
+    reviewedAt: now,
+    reviewedBy: adminId,
+    coverIcon: "book",
+    createdAt: now,
+    updatedAt: now,
+    modules: [
+      {
+        id: "el-m1",
+        title: "Sécurité en atelier",
+        summary: "EPI, coupures et gestes qui sauvent.",
+        order: 1,
+        lessons: [
+          {
+            id: "el-l1-1",
+            title: "Équipements de protection",
+            minutes: 12,
+            order: 1,
+            body: `## EPI obligatoire
+
+- Chaussures isolantes, gants adaptés, lunettes.
+- Ne travaillez jamais seul sur une installation sous tension.
+- Signalez la zone de travail aux collègues.
+
+### Hors ligne
+Ce module reste lisible après téléchargement du pack, même sans 3G.`,
+          },
+          {
+            id: "el-l1-2",
+            title: "Couper et vérifier l'alimentation",
+            minutes: 14,
+            order: 2,
+            body: `## Avant toute intervention
+
+1. Identifier le disjoncteur concerné.
+2. Couper.
+3. Vérifier l'absence de tension avec un testeur.
+4. Étiqueter « Travaux en cours ».`,
+          },
+          {
+            id: "el-l1-3",
+            title: "Gestes d'urgence",
+            minutes: 10,
+            order: 3,
+            body: `## Si accident
+
+- Couper l'alimentation si possible sans vous exposer.
+- Appeler les secours / responsable atelier.
+- Ne jamais toucher une victime encore en contact avec le courant.`,
+          },
+        ],
+        quiz: [
+          {
+            id: "el-q1a",
+            prompt: "Que faire avant d'ouvrir un tableau électrique ?",
+            choices: [
+              "Commencer tout de suite",
+              "Couper et vérifier l'absence de tension",
+              "Demander à un ami de filmer",
+              "Mouiller les mains",
+            ],
+            correctIndex: 1,
+            explanation: "Sécurité : couper + vérifier.",
+          },
+          {
+            id: "el-q1b",
+            prompt: "Pourquoi les EPI ?",
+            choices: [
+              "Pour la mode",
+              "Pour réduire le risque de blessure et d'électrisation",
+              "Ce n'est jamais utile",
+              "Uniquement le dimanche",
+            ],
+            correctIndex: 1,
+            explanation: "Les EPI protègent l'apprenti en atelier.",
+          },
+        ],
+      },
+      {
+        id: "el-m2",
+        title: "Circuits simples",
+        summary: "Lampe, interrupteur, continuité.",
+        order: 2,
+        lessons: [
+          {
+            id: "el-l2-1",
+            title: "Schéma lampe + interrupteur",
+            minutes: 16,
+            order: 1,
+            body: `## Circuit de base
+
+Phase → interrupteur → lampe → neutre.  
+Comprenez le rôle de chaque fil avant de câbler.`,
+          },
+          {
+            id: "el-l2-2",
+            title: "Tester la continuité",
+            minutes: 14,
+            order: 2,
+            body: `## Multimètre
+
+- Mode continuité / ohmmètre.
+- Vérifiez les connexions une par une.
+- Notez vos mesures dans le carnet d'atelier.`,
+          },
+          {
+            id: "el-l2-3",
+            title: "Erreurs fréquentes des débutants",
+            minutes: 12,
+            order: 3,
+            body: `## À éviter
+
+- Neutre et phase inversés.
+- Serrage insuffisant des bornes.
+- Oublier la terre sur les appareils concernés.`,
+          },
+        ],
+        quiz: [
+          {
+            id: "el-q2a",
+            prompt: "Dans un circuit lampe simple, l'interrupteur coupe généralement :",
+            choices: ["Le neutre uniquement", "La phase", "La terre", "Rien"],
+            correctIndex: 1,
+            explanation: "On coupe la phase pour isoler la charge.",
+          },
+          {
+            id: "el-q2b",
+            prompt: "À quoi sert le test de continuité ?",
+            choices: [
+              "À décorer le tableau",
+              "À vérifier qu'un chemin électrique est bien fermé",
+              "À augmenter la tension",
+              "À payer le MoMo",
+            ],
+            correctIndex: 1,
+            explanation: "La continuité confirme le câblage.",
+          },
+        ],
+      },
+      {
+        id: "el-m3",
+        title: "Dépannage de base",
+        summary: "Diagnostiquer sans aggraver.",
+        order: 3,
+        lessons: [
+          {
+            id: "el-l3-1",
+            title: "Méthode : observer, isoler, tester",
+            minutes: 12,
+            order: 1,
+            body: `## Diagnostic
+
+1. Que faisait le client / l'atelier juste avant la panne ?
+2. Isoler la zone.
+3. Tester du général vers le particulier.`,
+          },
+          {
+            id: "el-l3-2",
+            title: "Disjoncteur qui saute",
+            minutes: 14,
+            order: 2,
+            body: `## Surcharge ou défaut
+
+- Débrancher les charges.
+- Remettre le disjoncteur.
+- Reconnecter une par une pour trouver le fautif.`,
+          },
+          {
+            id: "el-l3-3",
+            title: "Quand appeler un senior",
+            minutes: 8,
+            order: 3,
+            body: `## Limites de l'apprenti
+
+Haute tension, incendie, odeur de brûlé persistante, doute sur le schéma : stop et escalade.`,
+          },
+        ],
+        quiz: [
+          {
+            id: "el-q3a",
+            prompt: "Un disjoncteur saute en boucle. Que faire d'abord ?",
+            choices: [
+              "Forcer le levier",
+              "Débrancher les charges et isoler",
+              "Ignorer",
+              "Doubler le calibre sans analyse",
+            ],
+            correctIndex: 1,
+            explanation: "Isoler puis diagnostiquer.",
+          },
+        ],
+      },
+    ],
+  };
+
+  const coursePending: Course = {
+    id: newId("crs"),
+    academyId,
+    slug: "soudure-intro-brouillon",
+    title: "Soudure - introduction (brouillon)",
+    tagline: "En attente de validation admin",
+    description: "Module FP soumis pour contrôle qualité avant publication publique.",
+    priceCdf: 600,
     currency: "CDF",
     status: "pending_review",
     reviewNote: null,
@@ -549,177 +754,26 @@ Volumes par opérateur, frais estimés, incidents. Une demi-page suffit.`,
     updatedAt: now,
     modules: [
       {
-        id: "wa-m1",
-        title: "Profil pro",
-        summary: "Photo, bio, horaires, catalogue de base.",
+        id: "su-m1",
+        title: "Sécurité soudure",
+        summary: "EPI et zone de travail.",
         order: 1,
         lessons: [
           {
-            id: "wa-l1-1",
-            title: "Configurer un profil qui vend",
-            minutes: 12,
-            order: 1,
-            body: `## Profil
-
-- Photo nette de vos produits (pas de selfie flou).
-- Bio : métier + quartier + horaires.
-- Statut : « Devis sous 2 h · Paiement MoMo ».`,
-          },
-          {
-            id: "wa-l1-2",
-            title: "Créer un mini-catalogue photo",
-            minutes: 15,
-            order: 2,
-            body: `## Catalogue
-
-3 à 8 photos max au début. Même fond, bonne lumière. Prix ou « à partir de » sous chaque image.`,
-          },
-          {
-            id: "wa-l1-3",
-            title: "Messages d'accueil enregistrés",
+            id: "su-l1",
+            title: "Équipements de protection",
             minutes: 10,
-            order: 3,
-            body: `## Réponses rapides
-
-Préparez : salutation, liste de produits, délais, zones de livraison.`,
-          },
-        ],
-        quiz: [
-          {
-            id: "wa-q1a",
-            prompt: "Que mettre en priorité sur la photo de profil ?",
-            choices: [
-              "Une photo de vacances",
-              "Une image nette de votre offre",
-              "Un meme",
-              "Rien",
-            ],
-            correctIndex: 1,
-            explanation: "Le client doit comprendre ce que vous vendez en 1 seconde.",
-          },
-          {
-            id: "wa-q1b",
-            prompt: "Combien de photos pour démarrer un catalogue ?",
-            choices: ["Aucune", "3 à 8 photos nettes", "200 photos", "Uniquement des vidéos"],
-            correctIndex: 1,
-            explanation: "Peu mais net : le client compare vite.",
-          },
-        ],
-      },
-      {
-        id: "wa-m2",
-        title: "Devis et commande",
-        summary: "Qualifier le besoin, chiffrer, confirmer.",
-        order: 2,
-        lessons: [
-          {
-            id: "wa-l2-1",
-            title: "Questions pour qualifier le client",
-            minutes: 14,
             order: 1,
-            body: `## Qualifier
-
-Budget approximatif, délai, taille / quantité, lieu de livraison. Une question à la fois.`,
-          },
-          {
-            id: "wa-l2-2",
-            title: "Modèle de devis WhatsApp",
-            minutes: 16,
-            order: 2,
-            body: `## Devis type
-
-Article | Qté | Prix | Total  
-Délai : …  
-Acompte : …  
-Valable jusqu'au : …
-
-Envoyez en texte clair, pas seulement en image floue.`,
-          },
-          {
-            id: "wa-l2-3",
-            title: "Confirmer paiement MoMo + production",
-            minutes: 12,
-            order: 3,
-            body: `## Après paiement
-
-1. Confirmer réception du MoMo.
-2. Donner un délai réaliste.
-3. Envoyer une photo « en cours » si le délai dépasse 48 h.`,
+            body: `## EPI\n\nMasque, gants, tablier. Zone ventilée. Jamais sans supervision en atelier.`,
           },
         ],
         quiz: [
           {
-            id: "wa-q2a",
-            prompt: "Pourquoi un devis écrit est utile ?",
-            choices: [
-              "Pour remplir le téléphone",
-              "Pour éviter malentendus sur prix et délai",
-              "Parce que WhatsApp l'impose",
-              "Pour bloquer le client",
-            ],
+            id: "su-q1",
+            prompt: "Que faire avant d’allumer un poste de soudure ?",
+            choices: ["Rien", "Vérifier EPI et zone", "Appeler un ami", "Couper toute électricité du quartier"],
             correctIndex: 1,
-            explanation: "Le devis aligne client et artisan avant production.",
-          },
-          {
-            id: "wa-q2b",
-            prompt: "Quand démarrer la production ?",
-            choices: [
-              "Dès le premier « ok » oral",
-              "Après accord clair et acompte / paiement selon vos règles",
-              "Jamais",
-              "Après 10 messages",
-            ],
-            correctIndex: 1,
-            explanation: "Protégez votre temps et vos stocks.",
-          },
-        ],
-      },
-      {
-        id: "wa-m3",
-        title: "Fidélisation",
-        summary: "Relances, avis, petites campagnes Status.",
-        order: 3,
-        lessons: [
-          {
-            id: "wa-l3-1",
-            title: "Relancer sans harceler",
-            minutes: 11,
-            order: 1,
-            body: `## Relance
-
-J+1 après devis, puis J+4 max. Message court, utile, avec une option de sortie (« dites STOP »).`,
-          },
-          {
-            id: "wa-l3-2",
-            title: "Demander un avis et une photo client",
-            minutes: 10,
-            order: 2,
-            body: `## Preuve sociale
-
-Après livraison : « Une photo vous va ? » Republiez (avec accord) en Status.`,
-          },
-          {
-            id: "wa-l3-3",
-            title: "Status hebdo qui convertit",
-            minutes: 12,
-            order: 3,
-            body: `## Status
-
-1 nouveauté + 1 témoignage + 1 promo limitée. Pas 30 stories chaotiques.`,
-          },
-        ],
-        quiz: [
-          {
-            id: "wa-q3a",
-            prompt: "Combien de relances après un devis en général ?",
-            choices: [
-              "Une vingtaine par jour",
-              "1 à 2 messages utiles, espacés",
-              "Aucune jamais",
-              "Un appel à 5 h du matin",
-            ],
-            correctIndex: 1,
-            explanation: "La relance respecte le client tout en restant visible.",
+            explanation: "Sécurité d’abord.",
           },
         ],
       },
@@ -730,7 +784,7 @@ Après livraison : « Une photo vous va ? » Republiez (avec accord) en Status.`
     seedVersion: SEED_VERSION,
     users: [admin, teacher, learner],
     academies: [academy],
-    courses: [courseWeb, courseMomo, courseWhatsapp],
+    courses: [courseWeb, courseMomo, courseFp, coursePending],
     enrollments: [],
     progress: [],
     certificates: [],

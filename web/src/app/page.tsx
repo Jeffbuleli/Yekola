@@ -7,9 +7,9 @@ import { PLANS, formatFc } from "@/lib/plans";
 import { listPublishedCourses } from "@/lib/db/queries";
 
 export const metadata: Metadata = {
-  title: "Yekola - Créez. Vendez. Apprenez hors ligne.",
+  title: "Yekola - Formation professionnelle hors ligne.",
   description:
-    "Les formateurs s’abonnent pour publier leurs cours. Les apprenants achètent un cours et peuvent l’apprendre hors ligne après l’achat. Mobile Money natif.",
+    "Plateforme de cours téléchargeables pour la formation professionnelle en zones à faible connectivité. Mobile Money natif.",
 };
 
 export default function HomePage() {
@@ -24,17 +24,17 @@ export default function HomePage() {
           <div className="yk-shell relative grid gap-8 py-10 sm:gap-10 sm:py-14 lg:grid-cols-2 lg:items-center lg:py-20">
             <div>
               <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--yk-amber)] sm:text-xs">
-                Formation en ligne · Afrique
+                Formation professionnelle · Offline-first
               </p>
               <h1 className="font-display text-[1.85rem] font-bold leading-tight sm:text-4xl lg:text-5xl">
-                Créez. Vendez.{" "}
+                Apprenez un métier.{" "}
                 <span className="bg-gradient-to-r from-[var(--yk-lime)] to-[var(--yk-mint)] bg-clip-text text-transparent">
-                  Apprenez hors ligne.
+                  Même hors ligne.
                 </span>
               </h1>
               <p className="mt-4 max-w-md text-sm text-[#c5d6cb] sm:text-base lg:text-lg">
-                Abonnez-vous pour publier vos formations. Vos apprenants paient chaque cours -
-                et continuent d’apprendre même sans Internet après l’achat.
+                Pour les centres et jeunes en formation professionnelle : cours téléchargeables,
+                suivables hors ligne, payés en Mobile Money.
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row sm:flex-wrap">
                 <Link href="/auth/register?role=teacher" className="yk-btn yk-btn-primary w-full sm:w-auto">
@@ -241,7 +241,7 @@ export default function HomePage() {
 
         <footer className="border-t border-[var(--yk-line)] py-8 text-center text-sm text-[var(--yk-muted)]">
           <p>Yekola · McBuleli · yekola.mcbuleli.com</p>
-          <p className="mt-1">Créez. Vendez. Apprenez - même hors ligne.</p>
+          <p className="mt-1">Apprenez un métier - même hors ligne.</p>
         </footer>
       </main>
     </div>
