@@ -29,6 +29,16 @@ function emptyDb(): DbShape {
 function ensureShape(db: DbShape): DbShape {
   if (!Array.isArray(db.payments)) db.payments = [];
   if (!Array.isArray(db.syncAccepted)) db.syncAccepted = [];
+  for (const c of db.courses) {
+    if (c.coverImage === undefined) c.coverImage = null;
+    if (typeof c.liveRequired !== "boolean") c.liveRequired = false;
+    if (!Array.isArray(c.liveSessions)) c.liveSessions = [];
+    for (const m of c.modules || []) {
+      for (const l of m.lessons || []) {
+        if (!Array.isArray(l.media)) l.media = [];
+      }
+    }
+  }
   return db;
 }
 

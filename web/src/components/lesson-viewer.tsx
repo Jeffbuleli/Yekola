@@ -1,22 +1,31 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { LessonCompleteButton } from "@/components/lesson-complete-button";
 import {
   getLessonFromPack,
   isOfflineMode,
 } from "@/lib/sync/sync-manager";
+import type { LessonMedia } from "@/lib/types";
+
+type ServerLesson = {
+  title: string;
+  body: string;
+  minutes: number;
+  media?: LessonMedia[];
+};
 
 type Props = {
   courseId: string;
   lessonId: string;
   courseTitle: string;
-  serverLesson: { title: string; body: string; minutes: number } | null;
+  serverLesson: ServerLesson | null;
 };
 
 export function LessonViewer({ courseId, lessonId, courseTitle, serverLesson }: Props) {
-  const [lesson, setLesson] = useState(serverLesson);
+  const [lesson, setLesson] = useState<ServerLesson | null>(serverLesson);
   const [fromPack, setFromPack] = useState(false);
   const [title, setTitle] = useState(courseTitle);
   const [loading, setLoading] = useState(!serverLesson);
@@ -37,6 +46,7 @@ export function LessonViewer({ courseId, lessonId, courseTitle, serverLesson }: 
           title: packed.title,
           body: packed.body,
           minutes: packed.minutes,
+          media: (packed as { media?: LessonMedia[] }).media ?? [],
         });
         setTitle(packed.courseTitle);
         setFromPack(true);
@@ -59,7 +69,8 @@ export function LessonViewer({ courseId, lessonId, courseTitle, serverLesson }: 
     return (
       <main className="mx-auto max-w-2xl px-4 py-10">
         <p className="yk-card text-sm text-red-700">
-          Leçon indisponible hors ligne. Reconnectez-vous ou téléchargez le pack depuis « Mes cours ».
+          Leçon indisponible hors ligne. Reconnectez-vous ou téléchargez le pack depuis « Mes
+          cours ».
         </p>
         <Link href={`/learn/${courseId}`} className="mt-4 inline-block font-bold text-[var(--yk-teal)]">
           ← Retour
@@ -67,6 +78,8 @@ export function LessonViewer({ courseId, lessonId, courseTitle, serverLesson }: 
       </main>
     );
   }
+
+  const media = lesson.media ?? [];
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
@@ -85,6 +98,38 @@ export function LessonViewer({ courseId, lessonId, courseTitle, serverLesson }: 
       <article className="yk-card mt-6 whitespace-pre-wrap text-sm leading-relaxed">
         {lesson.body}
       </article>
+
+      {media.length > 0 && (
+        <section className="mt-6 space-y-4">
+          <h2 className="font-display font-bold text-[var(--yk-forest)]">Médias</h2>
+          {media.map((m) => (
+            <div key={m.id} className="yk-card">
+              <p className="mb-2 text-[10px] font-bold uppercase text-[var(--yk-teal)]">
+                {m.kind} · {m.name}
+              </p>
+              {m.kind === "image" && (
+                <div className="relative aspect-video overflow-hidden rounded-lg bg-[var(--yk-line)]">
+                  <Image src={m.url} alt={m.name} fill className="object-contain" sizes="640px" />
+                </div>
+              )}
+              {m.kind === "video" && (
+                <video src={m.url} controls className="w-full rounded-lg" preload="metadata" />
+              )}
+              {m.kind === "file" && (
+                <a
+                  href={m.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm font-bold text-[var(--yk-teal)] underline"
+                >
+                  Télécharger {m.name}
+                </a>
+              )}
+            </div>
+          ))}
+        </section>
+      )}
+
       <div className="mt-6">
         <LessonCompleteButton courseId={courseId} lessonId={lessonId} />
       </div>

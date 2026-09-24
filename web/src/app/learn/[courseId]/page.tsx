@@ -43,9 +43,11 @@ export default async function LearnCoursePage({
         <div className="mt-3">
           <CourseHead
             coverIcon={course.coverIcon}
+            coverImage={course.coverImage}
             title={course.title}
             detail={`Progression ${progress?.percent ?? 0}%`}
             size={28}
+            liveRequired={course.liveRequired}
           />
         </div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--yk-line)]">
@@ -55,8 +57,36 @@ export default async function LearnCoursePage({
           />
         </div>
 
+        {(course.liveSessions?.length ?? 0) > 0 && (
+          <section className="mt-6 yk-card">
+            <h2 className="font-display font-bold text-[var(--yk-forest)]">Calendrier live</h2>
+            {course.liveRequired && (
+              <p className="mt-1 text-xs font-semibold text-amber-800">
+                Ce cours exige la participation aux sessions marquées obligatoires.
+              </p>
+            )}
+            <ul className="mt-3 space-y-2 text-sm">
+              {course.liveSessions.map((s) => (
+                <li
+                  key={s.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--yk-line)] px-3 py-2"
+                >
+                  <div>
+                    <p className="font-bold">{s.title}</p>
+                    <p className="text-xs text-[var(--yk-muted)]">
+                      {new Date(s.startsAt).toLocaleString("fr-CD")} · {s.durationMin} min
+                      {s.required ? " · obligatoire" : ""}
+                    </p>
+                  </div>
+                  <MeetJoinButton courseId={courseId} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <MeetJoinButton courseId={courseId} />
+          {(course.liveSessions?.length ?? 0) === 0 && <MeetJoinButton courseId={courseId} />}
         </div>
 
         <div className="mt-6">

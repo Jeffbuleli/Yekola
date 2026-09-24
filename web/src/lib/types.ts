@@ -26,12 +26,23 @@ export type Academy = {
   createdAt: string;
 };
 
+export type MediaKind = "image" | "video" | "file";
+
+export type LessonMedia = {
+  id: string;
+  kind: MediaKind;
+  name: string;
+  url: string;
+  sizeBytes?: number;
+};
+
 export type Lesson = {
   id: string;
   title: string;
   minutes: number;
   body: string;
   order: number;
+  media: LessonMedia[];
 };
 
 export type QuizQuestion = {
@@ -49,6 +60,15 @@ export type CourseModule = {
   order: number;
   lessons: Lesson[];
   quiz: QuizQuestion[];
+};
+
+export type LiveSession = {
+  id: string;
+  title: string;
+  startsAt: string;
+  durationMin: number;
+  required: boolean;
+  meetUrl?: string;
 };
 
 export type Course = {
@@ -69,6 +89,11 @@ export type Course = {
   modules: CourseModule[];
   /** Clé d'icône SVG : code | wallet | store | book */
   coverIcon: string;
+  /** Image de couverture (URL publique). */
+  coverImage: string | null;
+  /** Au moins une session live obligatoire. */
+  liveRequired: boolean;
+  liveSessions: LiveSession[];
   createdAt: string;
   updatedAt: string;
 };

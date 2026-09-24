@@ -26,10 +26,12 @@ export default function CatalogPage() {
               key={c.id}
               href={`/courses/${c.slug}`}
               coverIcon={c.coverIcon}
+              coverImage={c.coverImage}
               title={c.title}
               detail={c.tagline}
-              meta={`${c.academy?.name ?? ""} · ${c.lessonCount} leçons`}
+              meta={`${c.academy?.name ?? ""} · ${c.lessonCount} leçons${c.liveRequired ? " · Live" : ""}`}
               priceCdf={c.priceCdf}
+              liveRequired={c.liveRequired}
             />
           ))}
           {courses.length === 0 && (

@@ -108,6 +108,7 @@ export function buildOfflinePack(courseId: string) {
         minutes: l.minutes,
         body: l.body,
         order: l.order,
+        media: l.media ?? [],
       })),
       quiz: m.quiz.map((q) => ({
         id: q.id,

@@ -43,3 +43,7 @@ next-env.d.ts
 # local datastore
 /data
 data/store.json
+
+# teacher uploads (runtime)
+/public/uploads/*
+!/public/uploads/.gitkeep

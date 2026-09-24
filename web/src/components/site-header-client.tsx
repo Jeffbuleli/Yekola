@@ -11,23 +11,25 @@ type Props = {
 };
 
 function linksForRole(role: Props["role"]) {
-  if (role === "admin") {
+  if (role === "learner") {
     return [
-      { href: "/admin", label: "Modération" },
+      { href: "/learn", label: "Mes cours" },
       { href: "/catalog", label: "Catalogue" },
+      { href: "/profile", label: "Profil" },
     ];
   }
   if (role === "teacher") {
     return [
       { href: "/studio", label: "Studio" },
-      { href: "/pricing", label: "Tarifs" },
       { href: "/catalog", label: "Catalogue" },
+      { href: "/profile", label: "Profil" },
     ];
   }
-  if (role === "learner") {
+  if (role === "admin") {
     return [
+      { href: "/admin", label: "Modération" },
       { href: "/catalog", label: "Catalogue" },
-      { href: "/learn", label: "Mes cours" },
+      { href: "/profile", label: "Profil" },
     ];
   }
   // Visiteur

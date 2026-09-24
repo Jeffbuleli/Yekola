@@ -47,9 +47,11 @@ export default async function CoursePage({
         )}
         <CourseHead
           coverIcon={course.coverIcon}
+          coverImage={course.coverImage}
           title={course.title}
           detail={course.tagline}
           size={32}
+          liveRequired={course.liveRequired}
         />
         <p className="mt-4 text-sm text-[var(--yk-muted)]">
           Par <strong className="text-[var(--yk-ink)]">{course.teacher?.name}</strong> ·{" "}
@@ -109,6 +111,25 @@ export default async function CoursePage({
             ))}
           </ol>
         </section>
+
+        {(course.liveSessions?.length ?? 0) > 0 && (
+          <section className="mt-8">
+            <h2 className="font-display text-xl font-bold text-[var(--yk-forest)]">
+              Sessions live
+            </h2>
+            <ul className="mt-3 space-y-2">
+              {course.liveSessions.map((s) => (
+                <li key={s.id} className="yk-card text-sm">
+                  <strong>{s.title}</strong>
+                  <p className="text-[var(--yk-muted)]">
+                    {new Date(s.startsAt).toLocaleString("fr-CD")} · {s.durationMin} min
+                    {s.required ? " · obligatoire" : " · optionnel"}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <section className="mt-8">
           <h2 className="font-display text-xl font-bold text-[var(--yk-forest)]">Description</h2>

@@ -8,7 +8,8 @@ import {
   getPlan,
 } from "@/lib/plans";
 import { enrichCourse, slugify } from "@/lib/db/queries";
-import type { Course, CourseModule } from "@/lib/types";
+import type { Course, CourseModule, LiveSession } from "@/lib/types";
+import { courseMeetUrl } from "@/lib/meet";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -56,12 +57,30 @@ export async function GET(req: Request) {
   return NextResponse.json({ courses });
 }
 
+const mediaSchema = z.object({
+  id: z.string(),
+  kind: z.enum(["image", "video", "file"]),
+  name: z.string(),
+  url: z.string(),
+  sizeBytes: z.number().optional(),
+});
+
+const liveSchema = z.object({
+  title: z.string().min(2),
+  startsAt: z.string(),
+  durationMin: z.number().min(15),
+  required: z.boolean().optional(),
+});
+
 const courseSchema = z.object({
   title: z.string().min(3),
   tagline: z.string().min(3),
   description: z.string().min(10),
   priceCdf: z.number().min(0),
   coverIcon: z.string().optional(),
+  coverImage: z.string().nullable().optional(),
+  liveRequired: z.boolean().optional(),
+  liveSessions: z.array(liveSchema).optional(),
   modules: z
     .array(
       z.object({
@@ -72,6 +91,7 @@ const courseSchema = z.object({
             title: z.string().min(2),
             minutes: z.number().min(1),
             body: z.string().min(10),
+            media: z.array(mediaSchema).optional(),
           }),
         ),
         quiz: z
@@ -129,6 +149,7 @@ export async function POST(req: Request) {
   let i = 1;
   while (db.courses.some((c) => c.slug === slug)) slug = `${baseSlug}-${i++}`;
 
+  const courseId = newId("crs");
   const modules: CourseModule[] = parsed.data.modules.map((m, mi) => ({
     id: newId("mod"),
     title: m.title,
@@ -140,6 +161,7 @@ export async function POST(req: Request) {
       minutes: l.minutes,
       body: l.body,
       order: li + 1,
+      media: (l.media ?? []).map((med) => ({ ...med, id: med.id || newId("med") })),
     })),
     quiz: (m.quiz ?? []).map((q) => ({
       id: newId("q"),
@@ -150,8 +172,20 @@ export async function POST(req: Request) {
     })),
   }));
 
+  const liveSessions: LiveSession[] = (parsed.data.liveSessions ?? []).map((ls) => {
+    const id = newId("live");
+    return {
+      id,
+      title: ls.title,
+      startsAt: ls.startsAt,
+      durationMin: ls.durationMin,
+      required: Boolean(ls.required),
+      meetUrl: courseMeetUrl(courseId, academy.slug),
+    };
+  });
+
   const course: Course = {
-    id: newId("crs"),
+    id: courseId,
     academyId: academy.id,
     slug,
     title: parsed.data.title,
@@ -164,6 +198,9 @@ export async function POST(req: Request) {
     reviewedAt: null,
     reviewedBy: null,
     coverIcon: parsed.data.coverIcon || "book",
+    coverImage: parsed.data.coverImage ?? null,
+    liveRequired: Boolean(parsed.data.liveRequired) || liveSessions.some((l) => l.required),
+    liveSessions,
     modules,
     createdAt: now,
     updatedAt: now,

@@ -1,7 +1,7 @@
 import { hashPassword, newId } from "@/lib/auth/crypto";
 import type { Academy, Course, DbShape, User } from "@/lib/types";
 
-export const SEED_VERSION = 6;
+export const SEED_VERSION = 7;
 const DEMO_PASSWORD = "yekola2026";
 
 export function buildSeed(): DbShape {
@@ -70,6 +70,9 @@ export function buildSeed(): DbShape {
     reviewedAt: now,
     reviewedBy: adminId,
     coverIcon: "code",
+    coverImage: "/covers/web.png",
+    liveRequired: false,
+    liveSessions: [],
     createdAt: now,
     updatedAt: now,
     modules: [
@@ -84,6 +87,7 @@ export function buildSeed(): DbShape {
             title: "Internet et smartphone en RDC",
             minutes: 12,
             order: 1,
+            media: [],
             body: `## Bienvenue
 
 Comprenez comment Internet arrive sur un téléphone en RDC (3G/4G, Wi-Fi cybercafé, forfait data).
@@ -98,6 +102,7 @@ Comprenez comment Internet arrive sur un téléphone en RDC (3G/4G, Wi-Fi cyberc
             title: "Sécurité de base",
             minutes: 10,
             order: 2,
+            media: [],
             body: `## Sécurité au quotidien
 
 - Mot de passe unique par service (gestionnaire recommandé).
@@ -110,6 +115,7 @@ Comprenez comment Internet arrive sur un téléphone en RDC (3G/4G, Wi-Fi cyberc
             title: "Qui fait quoi sur un projet web ?",
             minutes: 11,
             order: 3,
+            media: [],
             body: `## Rôles
 
 - **Client** : valide le besoin (menu, WhatsApp, horaires).
@@ -156,6 +162,7 @@ Comprenez comment Internet arrive sur un téléphone en RDC (3G/4G, Wi-Fi cyberc
             title: "Structure HTML d'une page PME",
             minutes: 18,
             order: 1,
+            media: [],
             body: `## HTML sémantique
 
 Utilisez \`header\`, \`main\`, \`footer\`. Un titre clair, un numéro WhatsApp, un bouton « Commander ».
@@ -168,6 +175,7 @@ Listez 5 infos que votre client veut voir en moins de 5 secondes sur mobile.`,
             title: "CSS responsive simple",
             minutes: 16,
             order: 2,
+            media: [],
             body: `## Mobile-first
 
 - Commencez par le petit écran, puis élargissez.
@@ -180,6 +188,7 @@ Listez 5 infos que votre client veut voir en moins de 5 secondes sur mobile.`,
             title: "Typographie et couleurs locales",
             minutes: 12,
             order: 3,
+            media: [],
             body: `## Identité
 
 Choisissez 2 couleurs max + une police lisible. Évitez le texte gris trop pâle.
@@ -221,6 +230,7 @@ Testez la page sur un vrai téléphone Android entrée de gamme.`,
             title: "Fonctions et événements",
             minutes: 18,
             order: 1,
+            media: [],
             body: `## Fonctions
 
 Une fonction regroupe une action réutilisable.
@@ -232,6 +242,7 @@ Exemple : au clic sur « Commander », vérifier le numéro puis ouvrir WhatsApp
             title: "Valider un formulaire commande",
             minutes: 20,
             order: 2,
+            media: [],
             body: `## Validation
 
 - Nom non vide.
@@ -245,6 +256,7 @@ Exercice : validez qu'un numéro a au moins 9 chiffres avant d'envoyer.`,
             title: "Messages de succès et d'erreur",
             minutes: 10,
             order: 3,
+            media: [],
             body: `## UX
 
 Confirmez toujours l'action (« Commande prête à envoyer »). En cas d'erreur, dites quoi corriger.`,
@@ -288,6 +300,7 @@ Confirmez toujours l'action (« Commande prête à envoyer »). En cas d'erreur,
             title: "Choisir un hébergement",
             minutes: 14,
             order: 1,
+            media: [],
             body: `## Héberger
 
 Pages statiques : Netlify, GitHub Pages, ou hébergeur local. Gardez une copie hors ligne du site livré.`,
@@ -297,6 +310,7 @@ Pages statiques : Netlify, GitHub Pages, ou hébergeur local. Gardez une copie h
             title: "Checklist avant de livrer au client",
             minutes: 12,
             order: 2,
+            media: [],
             body: `## Checklist
 
 1. Liens WhatsApp et téléphone testés.
@@ -339,6 +353,9 @@ Pages statiques : Netlify, GitHub Pages, ou hébergeur local. Gardez une copie h
     reviewedAt: now,
     reviewedBy: adminId,
     coverIcon: "wallet",
+    coverImage: "/covers/momo.png",
+    liveRequired: false,
+    liveSessions: [],
     createdAt: now,
     updatedAt: now,
     modules: [
@@ -353,6 +370,7 @@ Pages statiques : Netlify, GitHub Pages, ou hébergeur local. Gardez une copie h
             title: "Ouvrir et sécuriser un compte marchand",
             minutes: 14,
             order: 1,
+            media: [],
             body: `## Compte marchand
 
 Séparez le téléphone business du téléphone personnel. Notez chaque encaissement dans un carnet ou une feuille.
@@ -367,6 +385,7 @@ Séparez le téléphone business du téléphone personnel. Notez chaque encaisse
             title: "Orange, Airtel, M-Pesa : quoi savoir",
             minutes: 12,
             order: 2,
+            media: [],
             body: `## Opérateurs
 
 Chaque opérateur a ses frais et plafonds. Affichez clairement les numéros acceptés près de la caisse.`,
@@ -376,6 +395,7 @@ Chaque opérateur a ses frais et plafonds. Affichez clairement les numéros acce
             title: "Fraudes courantes à éviter",
             minutes: 13,
             order: 3,
+            media: [],
             body: `## Vigilance
 
 - Faux « agents » qui appellent pour un « remboursement ».
@@ -421,6 +441,7 @@ Chaque opérateur a ses frais et plafonds. Affichez clairement les numéros acce
             title: "Parcours client à la caisse",
             minutes: 15,
             order: 1,
+            media: [],
             body: `## Étapes
 
 1. Annoncer le montant à voix haute.
@@ -433,6 +454,7 @@ Chaque opérateur a ses frais et plafonds. Affichez clairement les numéros acce
             title: "Gérer un paiement en attente",
             minutes: 12,
             order: 2,
+            media: [],
             body: `## En attente
 
 Ne livrez pas avant confirmation. Notez le nom du client et l'heure. Relancez calmement après 2-3 minutes.`,
@@ -442,6 +464,7 @@ Ne livrez pas avant confirmation. Notez le nom du client et l'heure. Relancez ca
             title: "Remboursements et erreurs de montant",
             minutes: 14,
             order: 3,
+            media: [],
             body: `## Corrections
 
 Documentez chaque remboursement. Préférez le même canal (même opérateur) pour tracer.`,
@@ -485,6 +508,7 @@ Documentez chaque remboursement. Préférez le même canal (même opérateur) po
             title: "Tenir un cahier de caisse MoMo",
             minutes: 16,
             order: 1,
+            media: [],
             body: `## Colonnes utiles
 
 Date | Heure | Client | Opérateur | Montant | Réf SMS | Remarque
@@ -496,6 +520,7 @@ Totalisez le soir et comparez au solde affiché.`,
             title: "Trouver un écart rapidement",
             minutes: 14,
             order: 2,
+            media: [],
             body: `## Méthode
 
 1. Comparez le total du cahier et le solde.
@@ -507,6 +532,7 @@ Totalisez le soir et comparez au solde affiché.`,
             title: "Rapport hebdo pour le patron",
             minutes: 10,
             order: 3,
+            media: [],
             body: `## Synthèse
 
 Volumes par opérateur, frais estimés, incidents. Une demi-page suffit.`,
@@ -545,6 +571,18 @@ Volumes par opérateur, frais estimés, incidents. Une demi-page suffit.`,
     reviewedAt: now,
     reviewedBy: adminId,
     coverIcon: "book",
+    coverImage: "/covers/electric.png",
+    liveRequired: true,
+    liveSessions: [
+      {
+        id: "live-el-1",
+        title: "Atelier pratique - sécurité",
+        startsAt: new Date(Date.now() + 3 * 864e5).toISOString(),
+        durationMin: 60,
+        required: true,
+        
+      },
+    ],
     createdAt: now,
     updatedAt: now,
     modules: [
@@ -559,6 +597,7 @@ Volumes par opérateur, frais estimés, incidents. Une demi-page suffit.`,
             title: "Équipements de protection",
             minutes: 12,
             order: 1,
+            media: [],
             body: `## EPI obligatoire
 
 - Chaussures isolantes, gants adaptés, lunettes.
@@ -573,6 +612,7 @@ Ce module reste lisible après téléchargement du pack, même sans 3G.`,
             title: "Couper et vérifier l'alimentation",
             minutes: 14,
             order: 2,
+            media: [],
             body: `## Avant toute intervention
 
 1. Identifier le disjoncteur concerné.
@@ -585,6 +625,7 @@ Ce module reste lisible après téléchargement du pack, même sans 3G.`,
             title: "Gestes d'urgence",
             minutes: 10,
             order: 3,
+            media: [],
             body: `## Si accident
 
 - Couper l'alimentation si possible sans vous exposer.
@@ -630,6 +671,7 @@ Ce module reste lisible après téléchargement du pack, même sans 3G.`,
             title: "Schéma lampe + interrupteur",
             minutes: 16,
             order: 1,
+            media: [],
             body: `## Circuit de base
 
 Phase → interrupteur → lampe → neutre.  
@@ -640,6 +682,7 @@ Comprenez le rôle de chaque fil avant de câbler.`,
             title: "Tester la continuité",
             minutes: 14,
             order: 2,
+            media: [],
             body: `## Multimètre
 
 - Mode continuité / ohmmètre.
@@ -651,6 +694,7 @@ Comprenez le rôle de chaque fil avant de câbler.`,
             title: "Erreurs fréquentes des débutants",
             minutes: 12,
             order: 3,
+            media: [],
             body: `## À éviter
 
 - Neutre et phase inversés.
@@ -691,6 +735,7 @@ Comprenez le rôle de chaque fil avant de câbler.`,
             title: "Méthode : observer, isoler, tester",
             minutes: 12,
             order: 1,
+            media: [],
             body: `## Diagnostic
 
 1. Que faisait le client / l'atelier juste avant la panne ?
@@ -702,6 +747,7 @@ Comprenez le rôle de chaque fil avant de câbler.`,
             title: "Disjoncteur qui saute",
             minutes: 14,
             order: 2,
+            media: [],
             body: `## Surcharge ou défaut
 
 - Débrancher les charges.
@@ -713,6 +759,7 @@ Comprenez le rôle de chaque fil avant de câbler.`,
             title: "Quand appeler un senior",
             minutes: 8,
             order: 3,
+            media: [],
             body: `## Limites de l'apprenti
 
 Haute tension, incendie, odeur de brûlé persistante, doute sur le schéma : stop et escalade.`,
@@ -750,6 +797,9 @@ Haute tension, incendie, odeur de brûlé persistante, doute sur le schéma : st
     reviewedAt: null,
     reviewedBy: null,
     coverIcon: "store",
+    coverImage: "/covers/weld.png",
+    liveRequired: false,
+    liveSessions: [],
     createdAt: now,
     updatedAt: now,
     modules: [
@@ -764,6 +814,7 @@ Haute tension, incendie, odeur de brûlé persistante, doute sur le schéma : st
             title: "Équipements de protection",
             minutes: 10,
             order: 1,
+            media: [],
             body: `## EPI\n\nMasque, gants, tablier. Zone ventilée. Jamais sans supervision en atelier.`,
           },
         ],

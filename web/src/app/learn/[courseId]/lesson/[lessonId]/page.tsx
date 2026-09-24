@@ -13,7 +13,12 @@ export default async function LessonPage({
   const user = await getCurrentUser();
   // Auth soft: if offline shell loads without cookie, client pack still works for enrolled devices
   const course = getCourseById(courseId);
-  let serverLesson: { title: string; body: string; minutes: number } | null = null;
+  let serverLesson: {
+    title: string;
+    body: string;
+    minutes: number;
+    media?: { id: string; kind: "image" | "video" | "file"; name: string; url: string }[];
+  } | null = null;
   let courseTitle = "Cours";
 
   if (user && course && enrollmentFor(user.id, courseId)) {
@@ -25,6 +30,7 @@ export default async function LessonPage({
           title: found.title,
           body: found.body,
           minutes: found.minutes,
+          media: found.media ?? [],
         };
         break;
       }

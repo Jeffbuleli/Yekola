@@ -77,9 +77,11 @@ export default function HomePage() {
                   <CourseCard
                     href={`/courses/${courses[0].slug}`}
                     coverIcon={courses[0].coverIcon}
+                    coverImage={courses[0].coverImage}
                     title={courses[0].title}
                     detail={courses[0].tagline}
                     priceCdf={courses[0].priceCdf}
+                    liveRequired={courses[0].liveRequired}
                     dark
                   />
                 </div>
@@ -153,9 +155,11 @@ export default function HomePage() {
                     key={c.id}
                     href={`/courses/${c.slug}`}
                     coverIcon={c.coverIcon}
+                    coverImage={c.coverImage}
                     title={c.title}
                     detail={c.tagline}
                     priceCdf={c.priceCdf}
+                    liveRequired={c.liveRequired}
                   />
                 ))}
               </div>
