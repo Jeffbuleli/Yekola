@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAIProviderName } from "@/lib/ai/provider";
+import { canSendViaResend } from "@/lib/email/resend";
 import { isPawapayConfigured } from "@/lib/payments/pawapay-client";
 import { paymentsMode } from "@/lib/payments/provider";
 
@@ -16,6 +17,7 @@ export async function GET() {
       payments: paymentsMode(),
       pawapayConfigured: isPawapayConfigured(),
       meetBase,
+      resend: canSendViaResend() ? "configured" : "missing",
     },
   });
 }
