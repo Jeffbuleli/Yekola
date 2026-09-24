@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { AppShell, TEACHER_NAV } from "@/components/app-shell";
+import { SiteHeader } from "@/components/site-header";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/store";
 import { academyStats, enrichCourse } from "@/lib/db/queries";
@@ -41,7 +42,9 @@ export default async function StudioPage() {
   );
 
   return (
-    <AppShell
+    <div className="min-h-screen bg-[var(--yk-paper)]">
+      <SiteHeader />
+      <AppShell
       role="teacher"
       userName={user.name}
       title={academy.name}
@@ -151,6 +154,7 @@ export default async function StudioPage() {
           )}
         </div>
       </section>
-    </AppShell>
+      </AppShell>
+    </div>
   );
 }

@@ -26,7 +26,7 @@ export default function NewCoursePage() {
   const [tagline, setTagline] = useState("");
   const [description, setDescription] = useState("");
   const [priceCdf, setPriceCdf] = useState(1000);
-  const [coverPreset, setCoverPreset] = useState(COVER_PRESETS[2]);
+  const [, setCoverPreset] = useState(COVER_PRESETS[2]);
   const [coverImage, setCoverImage] = useState(COVER_PRESETS[2].src);
   const [coverIcon, setCoverIcon] = useState(COVER_PRESETS[2].icon);
   const [moduleTitle, setModuleTitle] = useState("Module 1");

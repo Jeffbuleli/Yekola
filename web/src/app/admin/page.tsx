@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppShell, ADMIN_NAV } from "@/components/app-shell";
+import { SiteHeader } from "@/components/site-header";
 import { CourseCoverIcon } from "@/components/icons";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/store";
@@ -25,7 +26,9 @@ export default async function AdminPage() {
   const rejected = db.courses.filter((c) => c.status === "rejected").length;
 
   return (
-    <AppShell
+    <div className="min-h-screen bg-[var(--yk-paper)]">
+      <SiteHeader />
+      <AppShell
       role="admin"
       userName={user.name}
       title="Modération des cours"
@@ -92,6 +95,7 @@ export default async function AdminPage() {
           <p className="text-[var(--yk-muted)]">Aucun cours en attente.</p>
         )}
       </section>
-    </AppShell>
+      </AppShell>
+    </div>
   );
 }

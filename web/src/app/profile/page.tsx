@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppShell, ADMIN_NAV, LEARNER_NAV, TEACHER_NAV } from "@/components/app-shell";
+import { SiteHeader } from "@/components/site-header";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/store";
 import { LogoutButton } from "@/components/logout-button";
@@ -25,7 +26,9 @@ export default async function ProfilePage() {
     role === "teacher" ? "/studio" : role === "admin" ? "/admin" : "/learn";
 
   return (
-    <AppShell
+    <div className="min-h-screen bg-[var(--yk-paper)]">
+      <SiteHeader />
+      <AppShell
       role={role}
       userName={user.name}
       title="Mon profil"
@@ -81,6 +84,7 @@ export default async function ProfilePage() {
       <div className="mt-6">
         <LogoutButton />
       </div>
-    </AppShell>
+      </AppShell>
+    </div>
   );
 }

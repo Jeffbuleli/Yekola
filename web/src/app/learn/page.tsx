@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppShell, LEARNER_NAV } from "@/components/app-shell";
+import { SiteHeader } from "@/components/site-header";
 import { CourseCard } from "@/components/course-card";
 import { getCurrentUser } from "@/lib/auth/session";
 import { userEnrollments } from "@/lib/db/queries";
@@ -18,7 +19,9 @@ export default async function LearnHubPage() {
   const certificates = db.certificates.filter((c) => c.userId === user.id);
 
   return (
-    <AppShell
+    <div className="min-h-screen bg-[var(--yk-paper)]">
+      <SiteHeader />
+      <AppShell
       role="learner"
       userName={user.name}
       title="Mes cours"
@@ -90,6 +93,7 @@ export default async function LearnHubPage() {
           </ul>
         </section>
       )}
-    </AppShell>
+      </AppShell>
+    </div>
   );
 }
