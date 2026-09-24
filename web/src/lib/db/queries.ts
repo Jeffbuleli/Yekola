@@ -9,6 +9,7 @@ export function publicUser(u: User) {
     name: u.name,
     role: u.role,
     academyId: u.academyId,
+    emailVerified: Boolean(u.emailVerifiedAt),
   };
 }
 

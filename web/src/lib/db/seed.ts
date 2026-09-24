@@ -1,7 +1,7 @@
 import { hashPassword, newId } from "@/lib/auth/crypto";
 import type { Academy, Course, DbShape, User } from "@/lib/types";
 
-export const SEED_VERSION = 7;
+export const SEED_VERSION = 8;
 const DEMO_PASSWORD = "yekola2026";
 
 export function buildSeed(): DbShape {
@@ -19,6 +19,11 @@ export function buildSeed(): DbShape {
     passwordHash: hashPassword(DEMO_PASSWORD),
     academyId: null,
     createdAt: now,
+    emailVerifiedAt: now,
+    emailVerifyTokenHash: null,
+    emailVerifyExpiresAt: null,
+    passwordResetTokenHash: null,
+    passwordResetExpiresAt: null,
   };
 
   const teacher: User = {
@@ -29,6 +34,11 @@ export function buildSeed(): DbShape {
     passwordHash: hashPassword(DEMO_PASSWORD),
     academyId,
     createdAt: now,
+    emailVerifiedAt: now,
+    emailVerifyTokenHash: null,
+    emailVerifyExpiresAt: null,
+    passwordResetTokenHash: null,
+    passwordResetExpiresAt: null,
   };
 
   const learner: User = {
@@ -39,6 +49,11 @@ export function buildSeed(): DbShape {
     passwordHash: hashPassword(DEMO_PASSWORD),
     academyId: null,
     createdAt: now,
+    emailVerifiedAt: now,
+    emailVerifyTokenHash: null,
+    emailVerifyExpiresAt: null,
+    passwordResetTokenHash: null,
+    passwordResetExpiresAt: null,
   };
 
   const academy: Academy = {

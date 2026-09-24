@@ -29,6 +29,18 @@ function emptyDb(): DbShape {
 function ensureShape(db: DbShape): DbShape {
   if (!Array.isArray(db.payments)) db.payments = [];
   if (!Array.isArray(db.syncAccepted)) db.syncAccepted = [];
+  for (const u of db.users) {
+    if (u.emailVerifiedAt === undefined) {
+      // Comptes démo / legacy : considérés confirmés
+      u.emailVerifiedAt = u.email.endsWith("@yekola.demo")
+        ? u.createdAt
+        : u.createdAt;
+    }
+    if (u.emailVerifyTokenHash === undefined) u.emailVerifyTokenHash = null;
+    if (u.emailVerifyExpiresAt === undefined) u.emailVerifyExpiresAt = null;
+    if (u.passwordResetTokenHash === undefined) u.passwordResetTokenHash = null;
+    if (u.passwordResetExpiresAt === undefined) u.passwordResetExpiresAt = null;
+  }
   for (const c of db.courses) {
     if (c.coverImage === undefined) c.coverImage = null;
     if (typeof c.liveRequired !== "boolean") c.liveRequired = false;

@@ -45,6 +45,12 @@ export default async function ProfilePage() {
           <p className="text-xs font-bold uppercase text-[var(--yk-muted)]">Compte</p>
           <p className="font-display text-xl font-bold text-[var(--yk-forest)]">{user.name}</p>
           <p className="text-sm">{user.email}</p>
+          <p className="text-sm">
+            Email :{" "}
+            <strong className={user.emailVerifiedAt ? "text-[var(--yk-teal)]" : "text-amber-700"}>
+              {user.emailVerifiedAt ? "Confirmé" : "Non confirmé"}
+            </strong>
+          </p>
           <p className="text-sm text-[var(--yk-muted)]">
             Rôle :{" "}
             <strong>

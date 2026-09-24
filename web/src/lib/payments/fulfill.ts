@@ -1,6 +1,7 @@
 import { newId } from "@/lib/auth/crypto";
 import { getDb, mutateDb } from "@/lib/db/store";
 import { getPlan } from "@/lib/plans";
+import { notifyPurchase } from "@/lib/email/notify";
 import type {
   Enrollment,
   PaymentIntent,
@@ -26,6 +27,13 @@ export function fulfillPaymentIntent(reference: string): {
   }
 
   let resultIntent: PaymentIntent = intent;
+  let purchaseNotify: {
+    to: string;
+    name: string;
+    courseTitle: string;
+    amountCdf: number;
+    courseId: string;
+  } | null = null;
 
   mutateDb((d) => {
     const p = d.payments.find((x) => x.reference === reference);
@@ -82,6 +90,13 @@ export function fulfillPaymentIntent(reference: string): {
         };
         d.walletTx.push(tx);
         academy.walletBalanceCdf += net;
+        purchaseNotify = {
+          to: user.email,
+          name: user.name,
+          courseTitle: course.title,
+          amountCdf: course.priceCdf,
+          courseId: course.id,
+        };
       }
     }
 
@@ -144,6 +159,10 @@ export function fulfillPaymentIntent(reference: string): {
     p.message = "Paiement confirmé";
     resultIntent = p;
   });
+
+  if (purchaseNotify) {
+    void notifyPurchase(purchaseNotify);
+  }
 
   return { ok: true, intent: resultIntent };
 }

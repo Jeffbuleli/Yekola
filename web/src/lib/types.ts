@@ -10,6 +10,12 @@ export type User = {
   passwordHash: string;
   academyId: string | null;
   createdAt: string;
+  /** ISO date when email was confirmed; null = pending. */
+  emailVerifiedAt: string | null;
+  emailVerifyTokenHash: string | null;
+  emailVerifyExpiresAt: string | null;
+  passwordResetTokenHash: string | null;
+  passwordResetExpiresAt: string | null;
 };
 
 export type Academy = {
