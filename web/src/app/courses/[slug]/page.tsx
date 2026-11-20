@@ -84,18 +84,20 @@ export default async function CoursePage({
           ) : user?.role === "admin" ? (
             <p className="text-sm text-[var(--yk-muted)]">Compte admin : pas d’achat.</p>
           ) : user ? (
-            <BuyCourseButton
-              courseId={course.id}
-              courseSlug={course.slug}
-              priceCdf={course.priceCdf}
-            />
-            <PiCheckoutButton
-              kind="course_purchase"
-              amountPi={cdfToPi(course.priceCdf)}
-              courseId={course.id}
-              label={`Yekola ${course.title}`}
-              redirectTo={`/learn/${course.id}`}
-            />
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+              <BuyCourseButton
+                courseId={course.id}
+                courseSlug={course.slug}
+                priceCdf={course.priceCdf}
+              />
+              <PiCheckoutButton
+                kind="course_purchase"
+                amountPi={cdfToPi(course.priceCdf)}
+                courseId={course.id}
+                label={`Yekola ${course.title}`}
+                redirectTo={`/learn/${course.id}`}
+              />
+            </div>
           ) : (
             <Link
               href={`/auth/login?next=${encodeURIComponent(`/courses/${slug}`)}`}
