@@ -1,4 +1,6 @@
-/** Connexion Pioneer via Pi SDK (Sandbox / hackathon). */
+import { piHostIsTestnet } from "@/lib/pi/host";
+
+/** Pioneer-only sur pi-test / localhost / Sandbox Pi — pas sur yekola.mcbuleli.com (Mainnet). */
 export function piConnectOnly(): boolean {
-  return process.env.NEXT_PUBLIC_PI_SANDBOX === "1";
+  return piHostIsTestnet();
 }

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 /** Vérification domaine Pi — corps exact, sans HTML. Ne pas committer la clé. */
 export async function GET() {
   const key = (
+    process.env.VERIFY_DOMAIN_TEST_PI ||
     process.env.PI_VALIDATION_KEY ||
     process.env.VALIDATION_KEY_YEKOLA ||
     ""

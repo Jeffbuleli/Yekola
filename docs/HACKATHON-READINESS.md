@@ -1,30 +1,42 @@
-# Yekola — état produit
+# Yekola — Pi Next (état actuel)
 
-Date: 2026-09-24
+Dernière mise à jour infra : 2026-11-20
 
-## Connexion (Sandbox / Pi Next)
+## URLs
 
-Avec `NEXT_PUBLIC_PI_SANDBOX=1`, **seule la connexion Pioneer** (SDK Pi) est proposée. Pas d’email / mot de passe dans le Sandbox.
+| Environnement | URL |
+|---------------|-----|
+| **Testnet (hackathon)** | https://pi-test.mcbuleli.com |
+| **Mainnet (plus tard)** | https://yekola.mcbuleli.com |
+| Sandbox navigateur | https://sandbox.minepi.com/mobile-app-ui/app/yekola-u9r1 |
+| Pi Developers | https://developers.minepi.com/devconsole/my-apps/6aff5974b28a33a0faf0d9d3 |
 
-| Contexte | Accès |
-|----------|--------|
-| Pioneer (Sandbox) | **Continuer avec Pi** → catalogue, achat cours en Test Pi |
-| Staging local prod | Comptes démo `*@yekola.demo` / `yekola2026` (si sandbox désactivé) |
+Domaine **pi-test** validé (`/validation-key.txt`).
 
-## Navigation par rôle
+## Connexion
 
-- Visiteur : Catalogue, Tarifs enseignants
-- Apprenant : Catalogue, Mes cours
-- Enseignant : Studio, Tarifs, Catalogue
-- Admin : Modération, Catalogue
+Sur **pi-test** : **Continuer avec Pi** (Pioneer uniquement).  
+Sur **yekola** (mainnet) : email / mot de passe jusqu’à l’app Pi Production.
 
-## Phases
+## Fait côté technique
 
-0–4 livrées (SaaS, offline, MoMo, certificats, Meet, IA).  
-Validation admin des cours avant public.
+- [x] App Staging Yekola (testnet)
+- [x] Login + paiements Pi (U2A cours + abo enseignant)
+- [x] Deploy VPS double instance (:3015 / :3016)
+- [x] `pi-test.mcbuleli.com` + HTTPS + clé domaine
+
+## Suite équipe (priorité hackathon)
+
+1. **Pi Browser** : https://pi-test.mcbuleli.com → Pioneer → acheter un cours test (Test π).
+2. **Console** : onglet Hackathon — inscrire **tous** les membres ; [register](https://developers.minepi.com/hackathon/register).
+3. **Contenu EN** : au moins **3 cours publiés en anglais** (titres, descriptions, 1ère leçon utile).
+4. **Listing Pi** : logo, description EN, captures, politique de confidentialité (URL publique).
+5. **Vidéo ≤ 3 min** (EN) : problème, démo Pi login + paiement + offline, équipe.
 
 ## Deploy
 
 ```bash
 bash ops/vps/deploy-app.sh
 ```
+
+Secrets : `web/.env.pi-test` sur le serveur (non versionné).

@@ -5,6 +5,7 @@ import { getDb, mutateDb } from "@/lib/db/store";
 import { enrollmentFor } from "@/lib/db/queries";
 import { fulfillPaymentIntent } from "@/lib/payments/fulfill";
 import { cdfToPi, getPlan, PLANS } from "@/lib/plans";
+import { hostFromRequest, piHostIsTestnet } from "@/lib/pi/host";
 import {
   piApiKey,
   piWalletAddress,
@@ -87,11 +88,15 @@ function upsertPending(args: {
   return intent!;
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const host = hostFromRequest(req);
+  const testnet = piHostIsTestnet(host);
+  const configured = Boolean(piApiKey());
   return NextResponse.json({
-    configured: Boolean(piApiKey()),
+    configured,
     wallet: Boolean(piWalletAddress()),
-    sandbox: process.env.NEXT_PUBLIC_PI_SANDBOX !== "0",
+    sandbox: testnet,
+    host,
   });
 }
 

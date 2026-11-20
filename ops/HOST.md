@@ -1,26 +1,32 @@
-# Hébergement yekola.mcbuleli.com
+# Hébergement Yekola
 
-## VPS
+## VPS `153.75.235.176`
 
-| VPS | IP | Rôle |
-|-----|-----|------|
-| **Principal** | `162.35.181.98` | yekola.mcbuleli.com, nginx, app :3015 |
+| URL | Port | Fichier env | Pi |
+|-----|------|-------------|-----|
+| **https://yekola.mcbuleli.com** | 3015 | `web/.env.production` | Mainnet (après app Production) |
+| **https://pi-test.mcbuleli.com** | 3016 | `web/.env.pi-test` | Testnet / hackathon |
+
+Service systemd : `yekola` et `yekola-pi-test`.
 
 ## DNS (Cloudflare)
 
 ```
-A  yekola.mcbuleli.com  → 162.35.181.98
+A  yekola.mcbuleli.com     → 153.75.235.176
+A  pi-test.mcbuleli.com    → 153.75.235.176
 ```
 
-## Ports
+## Pi Developers (app Staging `yekola-u9r1`)
 
-- App Yekola : `127.0.0.1:3015`
-- Meet optionnel : `live.mcbuleli.org` (rooms `yekola-*`)
+- `development_url` : `http://localhost:3015` (Sandbox local)
+- `frontend_url` : **https://pi-test.mcbuleli.com** (pas yekola.mcbuleli.com)
 
-## Repo
+Quand l’app **Production** Mainnet existera : `frontend_url` = **https://yekola.mcbuleli.com**.
 
-- GitHub : `Jeffbuleli/Yekola`
-- Local : `/Users/mac/Documents/Yekola`
-- Prod : `/opt/yekola`
+## Deploy
 
-Deploy : `bash ops/vps/deploy-app.sh`
+```bash
+bash ops/vps/deploy-app.sh
+```
+
+Les `.env.production` et `.env.pi-test` sur le serveur ne sont **pas** écrasés par rsync.

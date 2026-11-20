@@ -2,5 +2,7 @@
   "app_id": "6aff5974b28a33a0faf0d9d3",
   "name": "Yekola",
   "host_network": "testnet",
-  "slug": "yekola-u9r1"
+  "slug": "yekola-u9r1",
+  "frontend_url_test": "https://pi-test.mcbuleli.com",
+  "frontend_url_mainnet": "https://yekola.mcbuleli.com"
 }

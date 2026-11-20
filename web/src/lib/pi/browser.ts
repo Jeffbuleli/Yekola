@@ -28,13 +28,10 @@ declare global {
   }
 }
 
+import { piHostIsTestnet } from "@/lib/pi/host";
+
 export function piSandbox(): boolean {
-  if (process.env.NEXT_PUBLIC_PI_SANDBOX === "0") return false;
-  if (process.env.NEXT_PUBLIC_PI_SANDBOX === "1") return true;
-  if (typeof window !== "undefined" && window.location.hostname === "sandbox.minepi.com") {
-    return true;
-  }
-  return false;
+  return piHostIsTestnet();
 }
 
 export function loadPiSdk(): Promise<PiSdk> {
