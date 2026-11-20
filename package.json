@@ -1,0 +1,9 @@
+{
+  "name": "yekola",
+  "private": true,
+  "scripts": {
+    "dev": "sh web/scripts/dev.sh",
+    "build": "cd web && exec \"$HOME/.local/node-v20/bin/node\" ./node_modules/next/dist/bin/next build",
+    "start": "cd web && exec \"$HOME/.local/node-v20/bin/node\" ./node_modules/next/dist/bin/next start -p 3015"
+  }
+}

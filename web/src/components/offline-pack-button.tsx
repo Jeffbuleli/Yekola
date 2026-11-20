@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   getPack,
   hasPack,
+  precacheLearnUrls,
   queueEvent,
   savePack,
   type OfflinePack,
@@ -34,10 +35,11 @@ export function OfflinePackButton({ courseId }: { courseId: string }) {
       }
       const pack = data.pack as OfflinePack;
       await savePack(pack);
+      await precacheLearnUrls(pack);
       await queueEvent("PROGRESS_UPDATED", { courseId, action: "offline_pack_saved" });
       setReady(true);
       setPackMeta(pack);
-      setMsg("Disponible hors ligne sur cet appareil.");
+      setMsg("Disponible hors ligne. Ouvrez les leçons même sans Internet.");
     } catch {
       setMsg("Téléchargement impossible. Vérifiez votre connexion.");
     } finally {
@@ -52,8 +54,8 @@ export function OfflinePackButton({ courseId }: { courseId: string }) {
           <p className="font-display font-bold text-[var(--yk-forest)]">Pack hors ligne</p>
           <p className="text-sm text-[var(--yk-muted)]">
             {ready
-              ? "Ce cours est disponible sans Internet."
-              : "Téléchargez le contenu pour apprendre sans réseau."}
+              ? "Ce cours est disponible sans Internet (restez sur Yekola, ne fermez pas tout de suite après le téléchargement)."
+              : "Téléchargez le contenu pour apprendre sans réseau. Gardez l’onglet ouvert le temps du téléchargement."}
           </p>
           {packMeta && (
             <p className="mt-1 text-xs text-[var(--yk-muted)]">

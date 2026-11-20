@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { LearnNavLink } from "@/components/learn-nav-link";
 import { redirect, notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { IconArrowRight, IconCheck } from "@/components/icons";
@@ -8,6 +8,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { enrollmentFor, getCourseById } from "@/lib/db/queries";
 import { getDb } from "@/lib/db/store";
 import { OfflinePackButton } from "@/components/offline-pack-button";
+import { LearnProgressBar } from "@/components/learn-progress-bar";
 import { LessonCompleteButton } from "@/components/lesson-complete-button";
 import { MeetJoinButton } from "@/components/meet-join-button";
 import { LearnerTutorPanel } from "@/components/learner-tutor-panel";
@@ -47,7 +48,7 @@ export default async function LearnCoursePage({
 
   return (
     <div className="min-h-screen bg-[var(--yk-paper)]">
-      <SiteHeader />
+      <SiteHeader variant="app" />
       <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
         <Link href="/learn" className="text-sm font-bold text-[var(--yk-teal)]">
           ← Mes cours
@@ -57,21 +58,18 @@ export default async function LearnCoursePage({
             coverIcon={course.coverIcon}
             coverImage={course.coverImage}
             title={course.title}
-            detail={`Progression ${evald.percent}% · leçons ${evald.lessonDone}/${evald.lessonTotal} · quiz ${evald.quizPassed}/${evald.quizTotal}`}
+            detail={course.tagline || course.academy?.name || ""}
             size={28}
             liveRequired={course.liveRequired}
           />
         </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--yk-line)]">
-          <div
-            className="h-full bg-[var(--yk-lime)] transition-all"
-            style={{ width: `${evald.percent}%` }}
-          />
-        </div>
-        <p className="mt-2 text-xs text-[var(--yk-muted)]">
-          Brevet : toutes les leçons + chaque quiz ≥ {QUIZ_PASS_THRESHOLD}%. Sync auto
-          online/offline.
-        </p>
+        <LearnProgressBar
+          courseId={courseId}
+          lessonIds={course.modules.flatMap((m) => m.lessons.map((l) => l.id))}
+          quizModuleIds={qIds}
+          serverCompleted={progress?.completedLessonIds ?? []}
+          serverQuizScores={progress?.quizScores ?? {}}
+        />
 
         {(course.liveSessions?.length ?? 0) > 0 && (
           <section className="yk-card mt-6">
@@ -164,7 +162,7 @@ export default async function LearnCoursePage({
                         className="flex flex-col gap-2 rounded-lg border border-[var(--yk-line)] px-3 py-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
                       >
                         <div className="min-w-0">
-                          <Link
+                          <LearnNavLink
                             href={`/learn/${courseId}/lesson/${l.id}`}
                             className="inline-flex items-center gap-1.5 font-semibold text-[var(--yk-forest)]"
                           >
@@ -175,7 +173,7 @@ export default async function LearnCoursePage({
                               />
                             )}
                             {l.title}
-                          </Link>
+                          </LearnNavLink>
                           <p className="text-xs text-[var(--yk-muted)]">{l.minutes} min</p>
                         </div>
                         <LessonCompleteButton
@@ -189,13 +187,13 @@ export default async function LearnCoursePage({
                 </ul>
                 {m.quiz.length > 0 && (
                   <div className="mt-3 flex flex-wrap items-center gap-3">
-                    <Link
+                    <LearnNavLink
                       href={`/learn/${courseId}/quiz/${m.id}`}
                       className="inline-flex items-center gap-1 text-sm font-bold text-[var(--yk-teal)]"
                     >
                       {typeof quizScore === "number" ? "Repasser le quiz" : "Passer le quiz"}{" "}
                       <IconArrowRight size={16} />
-                    </Link>
+                    </LearnNavLink>
                     {typeof quizScore === "number" && (
                       <span
                         className={`text-xs font-bold ${

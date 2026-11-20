@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { Plan } from "@/lib/plans";
 import { formatFc } from "@/lib/plans";
@@ -9,6 +8,7 @@ import { MOMO_OPTIONS } from "@/lib/payments/momo-providers";
 import { PaymentPendingPanel } from "@/components/payment-pending-panel";
 import { humanizePaymentMessage } from "@/lib/payments/messages";
 import { IconCheck } from "@/components/icons";
+import { PiCheckoutButton } from "@/components/pi-checkout-button";
 
 function BillingInner() {
   const params = useSearchParams();
@@ -65,12 +65,8 @@ function BillingInner() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--yk-paper)] px-4 py-10">
-      <div className="mx-auto max-w-4xl">
-        <Link href="/studio" className="text-sm font-bold text-[var(--yk-teal)]">
-          ← Studio
-        </Link>
-        <h1 className="font-display mt-4 text-3xl font-bold text-[var(--yk-forest)]">
+    <div className="max-w-2xl">
+        <h1 className="font-display text-2xl font-bold text-[var(--yk-forest)] sm:text-3xl">
           Abonnement
         </h1>
         <p className="mt-2 text-[var(--yk-muted)]">
@@ -123,6 +119,9 @@ function BillingInner() {
                   <h2 className="font-display text-lg font-bold">{p.name}</h2>
                   <p className="font-display text-2xl font-bold">
                     {formatFc(p.priceCdf)}/mois
+                    {p.pricePi > 0 && (
+                      <span className="mt-1 block text-base">ou {p.pricePi} π/mois</span>
+                    )}
                   </p>
                   <ul className="mt-3 space-y-1 text-sm">
                     {p.features.map((f) => (
@@ -138,14 +137,23 @@ function BillingInner() {
                     onClick={() => subscribe(p.id)}
                     className="yk-btn yk-btn-primary mt-4 w-full disabled:opacity-50"
                   >
-                    {current === p.id ? "Plan actif" : `Passer à ${p.name}`}
+                    {current === p.id ? "Plan actif" : `Mobile Money · ${p.name}`}
                   </button>
+                  {current !== p.id && (
+                    <div className="mt-2">
+                      <PiCheckoutButton
+                        kind="teacher_subscription"
+                        amountPi={p.pricePi}
+                        planId={p.id}
+                        label={`Yekola ${p.name}`}
+                      />
+                    </div>
+                  )}
                 </article>
               ))}
             </div>
           </>
         )}
-      </div>
     </div>
   );
 }

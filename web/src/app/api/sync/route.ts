@@ -63,10 +63,17 @@ export async function POST(req: Request) {
         }
 
         if (type === "QUIZ_ATTEMPT_CREATED") {
-          const quizModuleId = String(payload.quizModuleId ?? "");
+          const quizModuleId = String(
+            payload.quizModuleId ?? payload.moduleId ?? "",
+          );
+          const quizScoreRaw = payload.quizScore ?? payload.score;
           const quizScore =
-            typeof payload.quizScore === "number" ? payload.quizScore : null;
-          if (quizModuleId && quizScore != null) {
+            typeof quizScoreRaw === "number"
+              ? quizScoreRaw
+              : typeof quizScoreRaw === "string" && quizScoreRaw.trim() !== ""
+                ? Number(quizScoreRaw)
+                : null;
+          if (quizModuleId && quizScore != null && !Number.isNaN(quizScore)) {
             const prev = p.quizScores[quizModuleId];
             if (prev == null || quizScore > prev) {
               p.quizScores[quizModuleId] = quizScore;

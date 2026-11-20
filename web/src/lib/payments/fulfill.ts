@@ -1,6 +1,6 @@
 import { newId } from "@/lib/auth/crypto";
 import { getDb, mutateDb } from "@/lib/db/store";
-import { getPlan } from "@/lib/plans";
+import { getPlan, splitPiPayment } from "@/lib/plans";
 import { notifyPurchase } from "@/lib/email/notify";
 import type {
   Enrollment,
@@ -63,16 +63,26 @@ export function fulfillPaymentIntent(reference: string): {
       );
       if (!already) {
         const plan = getPlan(academy.planId);
-        const fee = Math.round(course.priceCdf * (plan.commissionPercent / 100));
-        const net = course.priceCdf - fee;
+        const piSale = p.provider === "pi";
+        const grossPi = piSale ? Number(p.amountPi ?? 0) : 0;
+        const split = piSale
+          ? splitPiPayment(grossPi, plan.commissionPercent)
+          : { feePi: 0, teacherNetPi: 0 };
+        const fee = piSale
+          ? 0
+          : Math.round(course.priceCdf * (plan.commissionPercent / 100));
+        const net = piSale ? 0 : course.priceCdf - fee;
         const enrollment: Enrollment = {
           id: newId("enr"),
           userId: p.userId,
           courseId: course.id,
           academyId: academy.id,
-          amountPaidCdf: course.priceCdf,
+          amountPaidCdf: piSale ? 0 : course.priceCdf,
           platformFeeCdf: fee,
           teacherNetCdf: net,
+          amountPaidPi: piSale ? grossPi : undefined,
+          platformFeePi: piSale ? split.feePi : undefined,
+          teacherNetPi: piSale ? split.teacherNetPi : undefined,
           paymentRef: p.reference,
           paymentProvider: p.provider,
           offlinePackUnlocked: true,
@@ -84,17 +94,21 @@ export function fulfillPaymentIntent(reference: string): {
           academyId: academy.id,
           type: "sale",
           amountCdf: net,
-          description: `Vente : ${course.title} → ${user.name}`,
+          amountPi: piSale ? split.teacherNetPi : undefined,
+          description: piSale
+            ? `Vente Pi : ${course.title} → ${user.name} (commission ${plan.commissionPercent} %)`
+            : `Vente : ${course.title} → ${user.name}`,
           reference: p.reference,
           createdAt: now,
         };
         d.walletTx.push(tx);
-        academy.walletBalanceCdf += net;
+        if (piSale) academy.walletBalancePi = (academy.walletBalancePi ?? 0) + split.teacherNetPi;
+        else academy.walletBalanceCdf += net;
         purchaseNotify = {
           to: user.email,
           name: user.name,
           courseTitle: course.title,
-          amountCdf: course.priceCdf,
+          amountCdf: piSale ? 0 : course.priceCdf,
           courseId: course.id,
         };
       }

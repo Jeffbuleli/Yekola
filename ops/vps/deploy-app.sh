@@ -68,6 +68,8 @@ rsync -az --delete \
   --exclude .DS_Store \
   --exclude 'web/node_modules' \
   --exclude 'web/.next' \
+  --exclude 'web/data' \
+  --exclude 'web/data/**' \
   "$ROOT/" "$HOST:$REMOTE_DIR/"
 
 ssh -o BatchMode=yes "$HOST" "bash $REMOTE_DIR/ops/vps/deploy-app.sh --on-server"

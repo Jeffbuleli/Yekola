@@ -30,7 +30,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-[var(--yk-paper)]">
-      <SiteHeader />
+      <SiteHeader variant="app" />
       <AppShell
       role={role}
       userName={user.name}

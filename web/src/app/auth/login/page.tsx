@@ -9,6 +9,9 @@ import {
   authLabelClass,
 } from "@/components/auth-shell";
 import { PasskeyLoginButton } from "@/components/passkey-login-button";
+import { PiLoginButton } from "@/components/pi-login-button";
+import { PiAuthPanel } from "@/components/pi-auth-panel";
+import { piConnectOnly } from "@/lib/pi/client-env";
 
 function LoginForm() {
   const router = useRouter();
@@ -86,6 +89,16 @@ function LoginForm() {
     } finally {
       setBusy(false);
     }
+  }
+
+  const pioneerOnly = piConnectOnly();
+
+  if (pioneerOnly) {
+    return (
+      <AuthShell title="Connexion Pioneer">
+        <PiAuthPanel onSuccess={(role) => goAfterLogin(role)} />
+      </AuthShell>
+    );
   }
 
   return (
@@ -170,6 +183,9 @@ function LoginForm() {
         email={email}
         onSuccess={(data) => goAfterLogin(data.user.role)}
       />
+      <div className="mt-3">
+        <PiLoginButton onSuccess={(role) => goAfterLogin(role)} />
+      </div>
     </AuthShell>
   );
 }

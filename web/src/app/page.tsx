@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { IconAcademy, IconArrowRight, IconCheck, IconOffline, IconSell } from "@/components/icons";
 import { CourseCard } from "@/components/course-card";
 import { PLANS, formatFc } from "@/lib/plans";
 import { listPublishedCourses } from "@/lib/db/queries";
+import { getCurrentUser } from "@/lib/auth/session";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Yekola - Formation professionnelle hors ligne.",
@@ -12,8 +16,17 @@ export const metadata: Metadata = {
     "Plateforme de cours téléchargeables pour la formation professionnelle en zones à faible connectivité. Mobile Money natif.",
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const user = await getCurrentUser();
   const courses = listPublishedCourses().slice(0, 3);
+  const home =
+    user?.role === "admin"
+      ? "/admin"
+      : user?.role === "teacher"
+        ? "/studio"
+        : user
+          ? "/learn"
+          : null;
 
   return (
     <div className="min-h-screen bg-[var(--yk-paper)]">
@@ -37,15 +50,35 @@ export default function HomePage() {
                 suivables hors ligne, payés en Mobile Money.
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row sm:flex-wrap">
-                <Link href="/auth/register?role=teacher" className="yk-btn yk-btn-primary w-full sm:w-auto">
-                  Créer mon académie
-                </Link>
-                <Link
-                  href="/catalog"
-                  className="yk-btn w-full border border-[var(--yk-mint)] text-[var(--yk-mint)] sm:w-auto"
-                >
-                  Explorer les cours
-                </Link>
+                {user && home ? (
+                  <>
+                    <Link href={home} className="yk-btn yk-btn-primary w-full sm:w-auto">
+                      {user.role === "teacher"
+                        ? "Ouvrir mon studio"
+                        : user.role === "admin"
+                          ? "Modération"
+                          : "Mes cours"}
+                    </Link>
+                    <Link
+                      href="/catalog"
+                      className="yk-btn w-full border border-[var(--yk-mint)] text-[var(--yk-mint)] sm:w-auto"
+                    >
+                      Catalogue
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/auth/register?role=teacher" className="yk-btn yk-btn-primary w-full sm:w-auto">
+                      Créer mon académie
+                    </Link>
+                    <Link
+                      href="/catalog"
+                      className="yk-btn w-full border border-[var(--yk-mint)] text-[var(--yk-mint)] sm:w-auto"
+                    >
+                      Explorer les cours
+                    </Link>
+                  </>
+                )}
               </div>
               <p className="mt-4 text-xs text-[var(--yk-muted)] sm:text-sm">
                 Beta ouverte · Mobile Money · Pack hors ligne après achat
@@ -200,10 +233,20 @@ export default function HomePage() {
                   ))}
                 </ul>
                 <Link
-                  href={`/auth/register?role=teacher&plan=${p.id}`}
+                  href={
+                    user?.role === "teacher"
+                      ? `/studio/billing?plan=${p.id}`
+                      : user
+                        ? "/catalog"
+                        : `/auth/register?role=teacher&plan=${p.id}`
+                  }
                   className={`yk-btn mt-5 w-full ${p.highlighted ? "yk-btn-primary" : "yk-btn-secondary"}`}
                 >
-                  Choisir {p.name}
+                  {user?.role === "teacher"
+                    ? `Passer à ${p.name}`
+                    : user
+                      ? "Voir le catalogue"
+                      : `Choisir ${p.name}`}
                 </Link>
               </article>
             ))}
@@ -240,6 +283,68 @@ export default function HomePage() {
                 </details>
               ))}
             </div>
+          </div>
+        </section>
+
+
+        <section className="border-t border-[var(--yk-line)] bg-[var(--yk-paper)] py-12 sm:py-16">
+          <div className="yk-shell">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--yk-amber)]">
+                McBuleli
+              </p>
+              <h2 className="font-display mt-2 text-2xl font-bold text-[var(--yk-forest)] sm:text-3xl">
+                Équipe McBuleli
+              </h2>
+              <p className="mt-2 text-sm text-[var(--yk-muted)] sm:text-base">
+                E-learning avec mode hors-ligne
+              </p>
+            </div>
+            <ul className="mx-auto mt-10 grid max-w-5xl grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6">
+              {[
+                {
+                  name: "Ir Jeff Buleli",
+                  line: "Développeur",
+                  role: "Chef d’équipe",
+                  photo: "/team/jeff-buleli.png",
+                },
+                {
+                  name: "Mme Patty Basoga",
+                  line: "Étudiante L2 IG · HEC-Gombe",
+                  role: "Business Manager",
+                  photo: "/team/patty-basoga.png",
+                },
+                {
+                  name: "Mr Dan Muyumba",
+                  line: "Étudiant L3 Sciences & Tech. · UPN",
+                  role: "Spécialiste réseau",
+                  photo: "/team/dan-muyumba.jpg",
+                },
+              ].map((m) => (
+                <li key={m.name} className="group">
+                  <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--yk-line)] bg-white shadow-[0_10px_30px_rgba(13,61,46,0.06)] transition duration-300 hover:-translate-y-0.5 hover:border-[var(--yk-lime)]/50">
+                    <div className="relative aspect-[4/5] w-full overflow-hidden bg-[var(--yk-line)]">
+                      <Image
+                        src={m.photo}
+                        alt={m.name}
+                        fill
+                        className="object-cover object-top transition duration-500 group-hover:scale-[1.03]"
+                        sizes="(max-width:640px) 100vw, 33vw"
+                      />
+                    </div>
+                    <div className="flex flex-1 flex-col px-4 py-4 sm:px-5 sm:py-5">
+                      <h3 className="font-display text-lg font-bold leading-snug text-[var(--yk-forest)]">
+                        {m.name}
+                      </h3>
+                      <p className="mt-1 text-sm text-[var(--yk-muted)]">{m.line}</p>
+                      <p className="mt-3 inline-flex w-fit rounded-full bg-[var(--yk-forest)]/5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-[var(--yk-forest)]">
+                        {m.role}
+                      </p>
+                    </div>
+                  </article>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 

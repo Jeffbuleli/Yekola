@@ -20,7 +20,7 @@ export default async function LearnHubPage() {
 
   return (
     <div className="min-h-screen bg-[var(--yk-paper)]">
-      <SiteHeader />
+      <SiteHeader variant="app" />
       <AppShell
       role="learner"
       userName={user.name}
@@ -79,18 +79,52 @@ export default async function LearnHubPage() {
       {certificates.length > 0 && (
         <section className="mt-10">
           <h2 className="font-display text-xl font-bold text-[var(--yk-forest)]">
-            Mes certificats
+            Mes brevets
           </h2>
-          <ul className="mt-3 space-y-2">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {certificates.map((c) => (
-              <li key={c.id} className="yk-card text-sm">
-                <strong>{c.courseTitle}</strong> · {c.issuedAt} ·{" "}
-                <Link href={`/verify/${c.code}`} className="font-bold text-[var(--yk-teal)]">
-                  Vérifier {c.code}
-                </Link>
-              </li>
+              <article
+                key={c.id}
+                className="overflow-hidden rounded-2xl border border-[var(--yk-line)] bg-white"
+              >
+                <div className="bg-[var(--yk-forest)] px-4 py-3 text-white">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--yk-amber)]">
+                    Brevet
+                  </p>
+                  <h3 className="font-display mt-0.5 text-base font-bold leading-snug">
+                    {c.courseTitle}
+                  </h3>
+                </div>
+                <div className="space-y-2 px-4 py-3 text-sm">
+                  <p className="text-[var(--yk-muted)]">
+                    Émis le{" "}
+                    {new Date(c.issuedAt).toLocaleDateString("fr-CD", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </p>
+                  <p className="font-mono text-xs font-semibold">{c.code}</p>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Link
+                      href={`/verify/${c.code}`}
+                      className="yk-btn yk-btn-secondary !py-2 !text-xs"
+                    >
+                      Vérifier
+                    </Link>
+                    <a
+                      href={`/api/certificates/${encodeURIComponent(c.code)}`}
+                      className="yk-btn yk-btn-primary !py-2 !text-xs"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Télécharger
+                    </a>
+                  </div>
+                </div>
+              </article>
             ))}
-          </ul>
+          </div>
         </section>
       )}
       </AppShell>

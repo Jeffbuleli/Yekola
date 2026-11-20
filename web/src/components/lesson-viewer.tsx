@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { LearnNavLink } from "@/components/learn-nav-link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { LessonCompleteButton } from "@/components/lesson-complete-button";
@@ -72,9 +72,9 @@ export function LessonViewer({ courseId, lessonId, courseTitle, serverLesson }: 
           Leçon indisponible hors ligne. Reconnectez-vous ou téléchargez le pack depuis « Mes
           cours ».
         </p>
-        <Link href={`/learn/${courseId}`} className="mt-4 inline-block font-bold text-[var(--yk-teal)]">
+        <LearnNavLink href={`/learn/${courseId}`} className="mt-4 inline-block font-bold text-[var(--yk-teal)]">
           ← Retour
-        </Link>
+        </LearnNavLink>
       </main>
     );
   }
@@ -83,9 +83,9 @@ export function LessonViewer({ courseId, lessonId, courseTitle, serverLesson }: 
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
-      <Link href={`/learn/${courseId}`} className="text-sm font-bold text-[var(--yk-teal)]">
+      <LearnNavLink href={`/learn/${courseId}`} className="text-sm font-bold text-[var(--yk-teal)]">
         ← {title}
-      </Link>
+      </LearnNavLink>
       {fromPack && (
         <p className="mt-3 rounded-lg bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-900">
           Lecture depuis le pack hors ligne

@@ -27,7 +27,7 @@ export default async function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[var(--yk-paper)]">
-      <SiteHeader />
+      <SiteHeader variant="app" />
       <AppShell
       role="admin"
       userName={user.name}

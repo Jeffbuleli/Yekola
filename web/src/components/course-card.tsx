@@ -13,6 +13,8 @@ type CourseCardProps = {
   meta?: string;
   dark?: boolean;
   liveRequired?: boolean;
+  badge?: string | null;
+  badgeTone?: "done" | "progress" | "owned" | null;
 };
 
 /** Image/SVG à gauche, titre à droite, détail / prix en bas. */
@@ -26,6 +28,8 @@ export function CourseCard({
   meta,
   dark = false,
   liveRequired,
+  badge,
+  badgeTone,
 }: CourseCardProps) {
   return (
     <Link
@@ -45,9 +49,35 @@ export function CourseCard({
               Live requis
             </span>
           )}
+          {badge && (
+            <span
+              className={`absolute right-2 top-2 rounded-md px-2 py-0.5 text-[10px] font-bold ${
+                badgeTone === "done"
+                  ? "bg-emerald-600 text-white"
+                  : badgeTone === "progress"
+                    ? "bg-sky-600 text-white"
+                    : "bg-[var(--yk-forest)] text-white"
+              }`}
+            >
+              {badge}
+            </span>
+          )}
         </div>
       ) : null}
       <div className={coverImage ? "p-4" : dark ? "p-4" : "p-4"}>
+        {!coverImage && badge && (
+          <p
+            className={`mb-2 inline-block rounded-md px-2 py-0.5 text-[10px] font-bold ${
+              badgeTone === "done"
+                ? "bg-emerald-100 text-emerald-800"
+                : badgeTone === "progress"
+                  ? "bg-sky-100 text-sky-900"
+                  : "bg-[var(--yk-paper)] text-[var(--yk-forest)]"
+            }`}
+          >
+            {badge}
+          </p>
+        )}
         <div className="flex items-start gap-3">
           {!coverImage && (
             <CourseCoverIcon

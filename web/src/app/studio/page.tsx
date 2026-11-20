@@ -1,8 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import Image from "next/image";
-import { AppShell, TEACHER_NAV } from "@/components/app-shell";
-import { SiteHeader } from "@/components/site-header";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/store";
 import { academyStats, enrichCourse } from "@/lib/db/queries";
@@ -26,12 +23,8 @@ function actionLabel(status: string) {
 
 export default async function StudioPage() {
   const user = await getCurrentUser();
-  if (!user) redirect("/auth/login");
-  if (user.role === "admin") redirect("/admin");
-  if (user.role !== "teacher" || !user.academyId) redirect("/learn");
-
   const db = getDb();
-  const academy = db.academies.find((a) => a.id === user.academyId)!;
+  const academy = db.academies.find((a) => a.id === user!.academyId)!;
   const stats = academyStats(academy.id);
   const courses = db.courses
     .filter((c) => c.academyId === academy.id)
@@ -42,20 +35,16 @@ export default async function StudioPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[var(--yk-paper)]">
-      <SiteHeader />
-      <AppShell
-      role="teacher"
-      userName={user.name}
-      title={academy.name}
-      subtitle={`Plan ${stats.plan?.name} · ${academy.city} · soumettez vos cours à validation admin`}
-      nav={TEACHER_NAV}
-      actions={
+    <>
+      <div className="mb-4 flex flex-wrap gap-2">
         <Link href="/studio/courses/new" className="yk-btn yk-btn-primary">
           Nouveau cours
         </Link>
-      }
-    >
+        <Link href="/studio/wallet" className="yk-btn yk-btn-secondary">
+          Portefeuille · {formatFc(stats.walletBalanceCdf)}
+        </Link>
+      </div>
+
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
         {[
           { l: "Publiés", v: stats.publishedCourses },
@@ -79,7 +68,10 @@ export default async function StudioPage() {
           </h2>
           <ul className="mt-3 space-y-2">
             {upcomingLive.slice(0, 5).map((s) => (
-              <li key={s.id} className="yk-card flex flex-wrap items-center justify-between gap-2 text-sm">
+              <li
+                key={s.id}
+                className="yk-card flex flex-wrap items-center justify-between gap-2 text-sm"
+              >
                 <div>
                   <p className="font-bold">{s.title}</p>
                   <p className="text-[var(--yk-muted)]">
@@ -154,7 +146,6 @@ export default async function StudioPage() {
           )}
         </div>
       </section>
-      </AppShell>
-    </div>
+    </>
   );
 }

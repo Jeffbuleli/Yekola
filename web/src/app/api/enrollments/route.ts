@@ -29,12 +29,27 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const body = await req.json().catch(() => null);
-  const courseId = String(body?.courseId ?? "");
+  const rawId = String(body?.courseId ?? "").trim();
+  const rawSlug = String(body?.slug ?? "").trim();
   const msisdn = body?.msisdn ? String(body.msisdn) : undefined;
   const momoProvider = body?.momoProvider ? String(body.momoProvider) : undefined;
   const db = getDb();
-  const course = db.courses.find((c) => c.id === courseId && c.status === "published");
-  if (!course) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  const published = db.courses.filter((c) => c.status === "published");
+  const course =
+    published.find((c) => rawId && c.id === rawId) ||
+    published.find((c) => rawId && c.slug === rawId) ||
+    published.find((c) => rawSlug && c.slug === rawSlug) ||
+    published.find((c) => rawSlug && c.id === rawSlug);
+  if (!course) {
+    return NextResponse.json(
+      {
+        error: "course_not_found",
+        message: "Cours introuvable ou pas encore publié. Rafraîchissez la page et réessayez.",
+      },
+      { status: 404 },
+    );
+  }
+  const courseId = course.id;
 
   if (enrollmentFor(user.id, courseId)) {
     return NextResponse.json({ error: "already_enrolled" }, { status: 409 });

@@ -5,8 +5,11 @@ export type Plan = {
   name: string;
   /** Prix mensuel en francs congolais (FC). Free = 0. */
   priceCdf: number;
+  /** Même abonnement en Pi. 1 π = 1 000 FC. 100 % revient à Yekola. */
+  pricePi: number;
   maxCourses: number | null;
   maxLearners: number | null;
+  /** Part Yekola sur le paiement de l’apprenant. Le reste crédite l’enseignant. */
   commissionPercent: number;
   blurb: string;
   features: string[];
@@ -18,6 +21,7 @@ export const PLANS: Plan[] = [
     id: "free",
     name: "Free",
     priceCdf: 0,
+    pricePi: 0,
     maxCourses: 1,
     maxLearners: 15,
     commissionPercent: 20,
@@ -26,7 +30,7 @@ export const PLANS: Plan[] = [
       "1 cours actif",
       "Jusqu’à 15 apprenants",
       "Quiz et pack offline",
-      "Encaissement Mobile Money",
+      "Encaissement Pi ou Mobile Money",
       "Commission 20 %",
     ],
   },
@@ -34,6 +38,7 @@ export const PLANS: Plan[] = [
     id: "base",
     name: "Base",
     priceCdf: 1000,
+    pricePi: 1,
     maxCourses: 3,
     maxLearners: 50,
     commissionPercent: 10,
@@ -50,6 +55,7 @@ export const PLANS: Plan[] = [
     id: "pro",
     name: "Pro",
     priceCdf: 1500,
+    pricePi: 1.5,
     maxCourses: 10,
     maxLearners: 200,
     commissionPercent: 5,
@@ -67,6 +73,7 @@ export const PLANS: Plan[] = [
     id: "max",
     name: "Max",
     priceCdf: 2000,
+    pricePi: 2,
     maxCourses: null,
     maxLearners: null,
     commissionPercent: 0,
@@ -95,4 +102,26 @@ export function canPublishCourse(planId: PlanId, publishedCount: number): boolea
 export function formatFc(amount: number): string {
   const n = Math.round(amount);
   return `${n.toLocaleString("fr-CD")} FC`;
+}
+
+/** 1 π = 1 000 FC. Les cours suivent le même barème que l’abonnement. */
+export function cdfToPi(amountCdf: number): number {
+  if (amountCdf <= 0) return 0;
+  return Math.round((amountCdf / 1000) * 100) / 100;
+}
+
+export function formatPi(amount: number): string {
+  const n = Math.round(amount * 100) / 100;
+  return `${n.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} π`;
+}
+
+/** Part plateforme / part enseignant sur un paiement apprenant en Pi. */
+export function splitPiPayment(grossPi: number, commissionPercent: number): {
+  feePi: number;
+  teacherNetPi: number;
+} {
+  const gross = Math.round(grossPi * 100) / 100;
+  const feePi = Math.round(gross * (commissionPercent / 100) * 100) / 100;
+  const teacherNetPi = Math.round((gross - feePi) * 100) / 100;
+  return { feePi, teacherNetPi };
 }

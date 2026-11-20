@@ -51,8 +51,9 @@ export async function POST(req: Request) {
   const action = body?.action as string | undefined;
 
   if (action === "logout") {
-    await destroySession();
-    return NextResponse.json({ ok: true });
+    const res = NextResponse.json({ ok: true });
+    await destroySession(res);
+    return res;
   }
 
   if (action === "login") {
@@ -74,11 +75,12 @@ export async function POST(req: Request) {
       );
     }
     const token = sessionToken();
-    await createSession(user.id, token);
     const academy = user.academyId
       ? db.academies.find((a) => a.id === user.academyId) ?? null
       : null;
-    return NextResponse.json({ user: publicUser(user), academy });
+    const res = NextResponse.json({ user: publicUser(user), academy });
+    await createSession(user.id, token, res);
+    return res;
   }
 
   if (action === "register") {
@@ -97,6 +99,7 @@ export async function POST(req: Request) {
     let academyId: string | null = null;
     const now = new Date().toISOString();
     const verifyRaw = rawAuthToken();
+    const pollRaw = rawAuthToken();
     const demo = isDemoEmail(email);
 
     mutateDb((d) => {
@@ -131,22 +134,26 @@ export async function POST(req: Request) {
         emailVerifyExpiresAt: demo ? null : expiresInHours(24),
         passwordResetTokenHash: null,
         passwordResetExpiresAt: null,
+        devicePollTokenHash: demo ? null : hashAuthToken(pollRaw),
+        devicePollExpiresAt: demo ? null : expiresInHours(24),
+        devicePollPurpose: demo ? null : "verify",
       });
     });
 
     if (demo) {
       const token = sessionToken();
-      await createSession(userId, token);
       const fresh = getDb();
       const user = fresh.users.find((u) => u.id === userId)!;
       const academy = academyId
         ? fresh.academies.find((a) => a.id === academyId) ?? null
         : null;
-      return NextResponse.json({
+      const res = NextResponse.json({
         user: publicUser(user),
         academy,
         pendingVerification: false,
       });
+      await createSession(userId, token, res);
+      return res;
     }
 
     const mail = await notifyVerifyAccount({
@@ -160,6 +167,7 @@ export async function POST(req: Request) {
       pendingVerification: true,
       email,
       emailSent: mail.ok,
+      pollToken: pollRaw,
       message: mail.ok
         ? "Un email de confirmation vous a été envoyé."
         : "Compte créé. Email de confirmation non envoyé — réessayez depuis la page de confirmation.",
@@ -178,18 +186,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
     const verifyRaw = rawAuthToken();
+    const pollRaw = rawAuthToken();
     mutateDb((d) => {
       const u = d.users.find((x) => x.id === user.id);
       if (!u) return;
       u.emailVerifyTokenHash = hashAuthToken(verifyRaw);
       u.emailVerifyExpiresAt = expiresInHours(24);
+      u.devicePollTokenHash = hashAuthToken(pollRaw);
+      u.devicePollExpiresAt = expiresInHours(24);
+      u.devicePollPurpose = "verify";
     });
     const mail = await notifyVerifyAccount({
       to: email,
       name: user.name,
       rawToken: verifyRaw,
     });
-    return NextResponse.json({ ok: true, emailSent: mail.ok });
+    return NextResponse.json({ ok: true, emailSent: mail.ok, pollToken: pollRaw });
   }
 
   if (action === "verify_email") {
@@ -217,17 +229,18 @@ export async function POST(req: Request) {
     });
     await notifyWelcome({ to: user.email, name: user.name, role: user.role });
     const session = sessionToken();
-    await createSession(user.id, session);
     const fresh = getDb();
     const verified = fresh.users.find((u) => u.id === user.id)!;
     const academy = verified.academyId
       ? fresh.academies.find((a) => a.id === verified.academyId) ?? null
       : null;
-    return NextResponse.json({
+    const res = NextResponse.json({
       ok: true,
       user: publicUser(verified),
       academy,
     });
+    await createSession(user.id, session, res);
+    return res;
   }
 
   if (action === "forgot_password") {
@@ -248,13 +261,19 @@ export async function POST(req: Request) {
     const user = db.users.find((u) => u.email === email);
     let emailSent = false;
     let sendError: string | undefined;
+    let pollRawOut: string | null = null;
     if (user) {
       const resetRaw = rawAuthToken();
+      const pollRaw = rawAuthToken();
+      pollRawOut = pollRaw;
       mutateDb((d) => {
         const u = d.users.find((x) => x.id === user.id);
         if (!u) return;
         u.passwordResetTokenHash = hashAuthToken(resetRaw);
         u.passwordResetExpiresAt = expiresInHours(1);
+        u.devicePollTokenHash = hashAuthToken(pollRaw);
+        u.devicePollExpiresAt = expiresInHours(1);
+        u.devicePollPurpose = "reset";
       });
       const mail = await notifyPasswordReset({
         to: email,
@@ -277,6 +296,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       ok: true,
       emailSent: user ? emailSent : false,
+      pollToken: pollRawOut,
       message: user
         ? "Lien de récupération envoyé. Vérifiez votre boîte (et spam)."
         : "Si un compte existe pour cet email, un lien a été envoyé.",
@@ -306,14 +326,78 @@ export async function POST(req: Request) {
       u.passwordHash = hashPassword(password);
       u.passwordResetTokenHash = null;
       u.passwordResetExpiresAt = null;
-      // Confirm email if resetting via email link
       if (!u.emailVerifiedAt) u.emailVerifiedAt = new Date().toISOString();
+      // Keep devicePoll so the PC that requested reset can auto-login
+      if (u.devicePollPurpose === "reset") {
+        u.devicePollExpiresAt = expiresInHours(1);
+      }
     });
     await notifyPasswordChanged({ to: user.email, name: user.name });
-    return NextResponse.json({
+    const session = sessionToken();
+    const fresh = getDb();
+    const updated = fresh.users.find((u) => u.id === user.id)!;
+    const academy = updated.academyId
+      ? fresh.academies.find((a) => a.id === updated.academyId) ?? null
+      : null;
+    const res = NextResponse.json({
       ok: true,
-      message: "Mot de passe mis à jour. Vous pouvez vous connecter.",
+      message: "Mot de passe mis à jour.",
+      user: publicUser(updated),
+      academy,
     });
+    await createSession(user.id, session, res);
+    return res;
+  }
+
+
+  if (action === "poll_login") {
+    const raw = String(body.pollToken ?? "").trim();
+    if (!raw) {
+      return NextResponse.json({ error: "token_required" }, { status: 400 });
+    }
+    const tokenHash = hashAuthToken(raw);
+    const db = getDb();
+    const user = db.users.find(
+      (u) =>
+        u.devicePollTokenHash === tokenHash &&
+        !isExpired(u.devicePollExpiresAt),
+    );
+    if (!user) {
+      return NextResponse.json({ ready: false });
+    }
+
+    const purpose = user.devicePollPurpose;
+    if (purpose === "verify" && !user.emailVerifiedAt) {
+      return NextResponse.json({ ready: false });
+    }
+    if (purpose === "reset") {
+      // Ready only after password reset cleared the reset token
+      if (user.passwordResetTokenHash) {
+        return NextResponse.json({ ready: false });
+      }
+    }
+
+    mutateDb((d) => {
+      const u = d.users.find((x) => x.id === user.id);
+      if (!u) return;
+      u.devicePollTokenHash = null;
+      u.devicePollExpiresAt = null;
+      u.devicePollPurpose = null;
+    });
+
+    const session = sessionToken();
+    const fresh = getDb();
+    const u = fresh.users.find((x) => x.id === user.id)!;
+    const academy = u.academyId
+      ? fresh.academies.find((a) => a.id === u.academyId) ?? null
+      : null;
+    const res = NextResponse.json({
+      ready: true,
+      user: publicUser(u),
+      academy,
+    });
+    await createSession(u.id, session, res);
+    return res;
   }
 
   return NextResponse.json({ error: "unknown_action" }, { status: 400 });

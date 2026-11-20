@@ -8,6 +8,8 @@ import { IconClose, IconMenu } from "@/components/icons";
 type Props = {
   userName?: string | null;
   role?: "teacher" | "learner" | "admin" | null;
+  /** app = logo only; AppShell owns the menu (no double hamburger) */
+  variant?: "public" | "app";
 };
 
 function linksForRole(role: Props["role"]) {
@@ -21,6 +23,7 @@ function linksForRole(role: Props["role"]) {
   if (role === "teacher") {
     return [
       { href: "/studio", label: "Studio" },
+      { href: "/studio/wallet", label: "Portefeuille" },
       { href: "/catalog", label: "Catalogue" },
       { href: "/profile", label: "Profil" },
     ];
@@ -32,7 +35,6 @@ function linksForRole(role: Props["role"]) {
       { href: "/profile", label: "Profil" },
     ];
   }
-  // Visiteur
   return [
     { href: "/catalog", label: "Catalogue" },
     { href: "/pricing", label: "Tarifs enseignants" },
@@ -46,9 +48,14 @@ function homeForRole(role: Props["role"]) {
   return "/auth/login";
 }
 
-export function SiteHeaderClient({ userName, role }: Props) {
+export function SiteHeaderClient({
+  userName,
+  role,
+  variant = "public",
+}: Props) {
   const [open, setOpen] = useState(false);
   const links = linksForRole(role);
+  const isApp = variant === "app";
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--yk-line)] bg-white/95 backdrop-blur">
@@ -75,48 +82,61 @@ export function SiteHeaderClient({ userName, role }: Props) {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 text-sm font-semibold text-[var(--yk-forest)] md:flex lg:gap-2">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="rounded-lg px-2.5 py-2 hover:bg-[var(--yk-paper)] hover:text-[var(--yk-teal)]"
-            >
-              {l.label}
-            </Link>
-          ))}
-          {userName ? (
-            <Link href={homeForRole(role)} className="yk-btn yk-btn-primary !py-2 !text-xs">
-              {userName.split(" ")[0]}
-            </Link>
-          ) : (
-            <>
-              <Link href="/auth/login" className="yk-btn yk-btn-ghost !py-2 !text-xs">
-                Connexion
-              </Link>
+        {!isApp && (
+          <nav className="hidden items-center gap-1 text-sm font-semibold text-[var(--yk-forest)] lg:flex lg:gap-2">
+            {links.map((l) => (
               <Link
-                href="/auth/register?role=teacher"
-                className="yk-btn yk-btn-primary !hidden !py-2 !text-xs lg:!inline-flex"
+                key={l.href}
+                href={l.href}
+                className="rounded-lg px-2.5 py-2 hover:bg-[var(--yk-paper)] hover:text-[var(--yk-teal)]"
               >
-                Créer mon académie
+                {l.label}
               </Link>
-            </>
-          )}
-        </nav>
+            ))}
+            {userName ? (
+              <Link href={homeForRole(role)} className="yk-btn yk-btn-primary !py-2 !text-xs">
+                {userName.split(" ")[0]}
+              </Link>
+            ) : (
+              <>
+                <Link href="/auth/login" className="yk-btn yk-btn-ghost !py-2 !text-xs">
+                  Connexion
+                </Link>
+                <Link
+                  href="/auth/register?role=teacher"
+                  className="yk-btn yk-btn-primary !py-2 !text-xs"
+                >
+                  Créer mon académie
+                </Link>
+              </>
+            )}
+          </nav>
+        )}
 
-        <button
-          type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--yk-line)] text-[var(--yk-forest)] md:hidden"
-          aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? <IconClose size={20} /> : <IconMenu size={20} />}
-        </button>
+        {isApp && userName && (
+          <Link
+            href={homeForRole(role)}
+            className="hidden rounded-lg bg-[var(--yk-forest)] px-3 py-2 text-xs font-bold text-white sm:inline-flex"
+          >
+            {userName.split(" ")[0]}
+          </Link>
+        )}
+
+        {!isApp && (
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--yk-line)] text-[var(--yk-forest)] lg:hidden"
+            aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? <IconClose size={20} /> : <IconMenu size={20} />}
+          </button>
+        )}
       </div>
 
-      {open && (
-        <div className="border-t border-[var(--yk-line)] bg-white px-4 py-3 md:hidden">
+      {!isApp && open && (
+        <div className="border-t border-[var(--yk-line)] bg-white px-4 py-3 lg:hidden">
           <nav className="flex flex-col gap-1 text-sm font-semibold text-[var(--yk-forest)]">
             {links.map((l) => (
               <Link
@@ -138,11 +158,7 @@ export function SiteHeaderClient({ userName, role }: Props) {
               </Link>
             ) : (
               <div className="mt-2 flex flex-col gap-2">
-                <Link
-                  href="/auth/login"
-                  className="yk-btn yk-btn-ghost"
-                  onClick={() => setOpen(false)}
-                >
+                <Link href="/auth/login" className="yk-btn yk-btn-ghost" onClick={() => setOpen(false)}>
                   Connexion
                 </Link>
                 <Link

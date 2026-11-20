@@ -16,6 +16,13 @@ export type User = {
   emailVerifyExpiresAt: string | null;
   passwordResetTokenHash: string | null;
   passwordResetExpiresAt: string | null;
+  /** Token for the device waiting for email confirm / password reset (cross-device login). */
+  devicePollTokenHash: string | null;
+  devicePollExpiresAt: string | null;
+  devicePollPurpose: "verify" | "reset" | null;
+  /** Compte Pioneer lié (Pi Browser). */
+  piUid?: string | null;
+  piUsername?: string | null;
 };
 
 export type Academy = {
@@ -29,6 +36,8 @@ export type Academy = {
   subscriptionStatus: "active" | "trialing" | "past_due" | "canceled";
   subscriptionExpiresAt: string | null;
   walletBalanceCdf: number;
+  /** Solde enseignant en Pi (net après commission). */
+  walletBalancePi?: number;
   createdAt: string;
 };
 
@@ -116,6 +125,9 @@ export type Enrollment = {
   paymentProvider: string;
   offlinePackUnlocked: boolean;
   purchasedAt: string;
+  amountPaidPi?: number;
+  platformFeePi?: number;
+  teacherNetPi?: number;
 };
 
 export type ProgressRecord = {
@@ -149,6 +161,7 @@ export type WalletTx = {
   academyId: string;
   type: "sale" | "subscription" | "withdrawal" | "fee";
   amountCdf: number;
+  amountPi?: number;
   description: string;
   reference: string;
   createdAt: string;
@@ -173,7 +186,9 @@ export type PaymentIntent = {
   kind: PaymentKind;
   status: "demo" | "pending" | "paid" | "failed";
   amountCdf: number;
-  currency: "CDF";
+  /** Montant Pi quand provider = pi. L’abonnement va à Yekola ; la vente est partagée. */
+  amountPi?: number | null;
+  currency: "CDF" | "PI";
   msisdn: string | null;
   momoProvider: string | null;
   userId: string;

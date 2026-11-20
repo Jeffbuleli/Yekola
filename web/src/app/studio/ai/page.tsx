@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import Link from "next/link";
 
 export default function StudioAiPage() {
   const [subject, setSubject] = useState("Comptabilité pour petites boutiques");
@@ -30,12 +29,8 @@ export default function StudioAiPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--yk-paper)] px-4 py-10">
-      <div className="mx-auto max-w-2xl">
-        <Link href="/studio" className="text-sm font-bold text-[var(--yk-teal)]">
-          ← Studio
-        </Link>
-        <h1 className="font-display mt-4 text-2xl font-bold text-[var(--yk-forest)]">
+    <div className="max-w-2xl">
+<h1 className="font-display mt-4 text-2xl font-bold text-[var(--yk-forest)]">
           Assistant cours (optionnel)
         </h1>
         <p className="mt-2 text-sm text-[var(--yk-muted)]">
@@ -75,6 +70,5 @@ export default function StudioAiPage() {
           <pre className="yk-card mt-4 overflow-auto whitespace-pre-wrap text-sm">{out}</pre>
         )}
       </div>
-    </div>
   );
 }

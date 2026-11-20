@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { IconCheck } from "@/components/icons";
 import {
+  emitProgressChanged,
   getProgress,
   isOfflineMode,
   queueEvent,
-  setProgress,
+  saveLocalLessonDone,
   syncNow,
 } from "@/lib/sync/sync-manager";
 
@@ -41,20 +42,13 @@ export function LessonCompleteButton({
     };
   }, [courseId, lessonId, completed]);
 
-  async function persistLocal() {
-    const key = `local_done:${courseId}`;
-    const prev = (await getProgress<string[]>(key)) ?? [];
-    if (!prev.includes(lessonId)) {
-      await setProgress(key, [...prev, lessonId]);
-    }
-  }
-
   async function complete() {
     if (done || busy) return;
     setBusy(true);
     try {
       await queueEvent("LESSON_COMPLETED", { courseId, lessonId });
-      await persistLocal();
+      await saveLocalLessonDone(courseId, lessonId);
+      emitProgressChanged();
 
       if (!isOfflineMode()) {
         const res = await fetch("/api/progress", {
@@ -63,26 +57,18 @@ export function LessonCompleteButton({
           credentials: "same-origin",
           body: JSON.stringify({ courseId, lessonId }),
         });
-        if (!res.ok) {
-          // Keep queued for sync
-          try {
-            await syncNow();
-          } catch {
-            /* offline queue remains */
-          }
-        } else {
-          try {
-            await syncNow();
-          } catch {
-            /* ok */
-          }
-          setDone(true);
-          router.refresh();
-          return;
+        try {
+          await syncNow();
+        } catch {
+          /* keep queue */
         }
+        setDone(true);
+        emitProgressChanged();
+        if (res.ok) router.refresh();
+        return;
       }
       setDone(true);
-      if (!isOfflineMode()) router.refresh();
+      emitProgressChanged();
     } finally {
       setBusy(false);
     }

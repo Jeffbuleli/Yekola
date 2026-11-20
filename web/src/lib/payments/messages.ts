@@ -11,6 +11,15 @@ const STATUS_FR: Record<string, string> = {
   rejected: "Paiement refusé.",
   found: "Vérification en cours…",
   not_found: "Paiement introuvable.",
+  course_not_found: "Cours introuvable ou pas encore publié. Rafraîchissez la page.",
+  already_enrolled: "Vous êtes déjà inscrit à ce cours.",
+  own_course: "Vous ne pouvez pas acheter un cours de votre propre académie.",
+  admin_no_purchase: "Le compte admin ne peut pas acheter de cours.",
+  unauthorized: "Connectez-vous pour acheter ce cours.",
+  insufficient_balance: "Solde insuffisant pour ce retrait.",
+  invalid_amount: "Montant invalide.",
+  payment_failed: "Paiement ou retrait échoué.",
+  sudo_required: "Validez SUDO (passkey) pour retirer.",
 };
 
 function looksLikeJson(s: string) {

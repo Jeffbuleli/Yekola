@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
+  emitProgressChanged,
   getQuizFromPack,
   isOfflineMode,
   queueEvent,
+  saveLocalQuizScore,
   syncNow,
 } from "@/lib/sync/sync-manager";
 
@@ -84,7 +86,11 @@ export default function QuizPage() {
         courseId: params.courseId,
         quizModuleId: params.moduleId,
         quizScore: score,
+        moduleId: params.moduleId,
+        score,
       });
+      await saveLocalQuizScore(params.courseId, params.moduleId, score);
+      emitProgressChanged();
 
       if (!isOfflineMode()) {
         await fetch("/api/progress", {
@@ -107,6 +113,7 @@ export default function QuizPage() {
             ? `Score ${score}% — module validé (≥ ${PASS}%).`
             : `Score ${score}% — minimum ${PASS}% requis pour le brevet.`,
         );
+        emitProgressChanged();
         router.refresh();
       } else {
         setResult(

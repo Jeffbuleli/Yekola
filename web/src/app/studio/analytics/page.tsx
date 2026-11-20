@@ -11,12 +11,8 @@ export default async function AnalyticsPage() {
   const stats = academyAnalytics(user.academyId);
 
   return (
-    <div className="min-h-screen bg-[var(--yk-paper)] px-4 py-10">
-      <div className="mx-auto max-w-4xl">
-        <Link href="/studio" className="text-sm font-bold text-[var(--yk-teal)]">
-          ← Studio
-        </Link>
-        <h1 className="font-display mt-4 text-3xl font-bold text-[var(--yk-forest)]">
+    <div className="max-w-4xl">
+<h1 className="font-display mt-4 text-3xl font-bold text-[var(--yk-forest)]">
           Statistiques
         </h1>
         <p className="mt-1 text-sm text-[var(--yk-muted)]">
@@ -110,6 +106,5 @@ export default async function AnalyticsPage() {
           </>
         )}
       </div>
-    </div>
   );
 }

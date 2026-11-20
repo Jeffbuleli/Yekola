@@ -30,6 +30,7 @@ function ResetForm() {
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({ action: "reset_password", token, password }),
       });
       const data = await res.json();
@@ -41,7 +42,11 @@ function ResetForm() {
         );
         return;
       }
-      router.push("/auth/login?reset=1");
+      const role = data.user?.role as string | undefined;
+      router.push(
+        role === "admin" ? "/admin" : role === "teacher" ? "/studio" : "/learn",
+      );
+      router.refresh();
     } catch {
       setError("Erreur réseau.");
     } finally {

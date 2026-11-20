@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { startAuthentication } from "@simplewebauthn/browser";
 import { formatFc } from "@/lib/plans";
 import { MOMO_OPTIONS } from "@/lib/payments/momo-providers";
 import { PaymentPendingPanel } from "@/components/payment-pending-panel";
+import { humanizePaymentMessage } from "@/lib/payments/messages";
 
 type Tx = {
   id: string;
@@ -82,18 +82,35 @@ export default function WalletPage() {
       if (!res.ok) {
         if (d.error === "sudo_required") {
           setMsg("Ajoutez une passkey (Profil) puis validez SUDO pour retirer.");
+        } else if (d.error === "insufficient_balance") {
+          setMsg("Solde insuffisant pour ce retrait.");
         } else {
-          setMsg(d.message || d.error || "Échec");
+          setMsg(
+            humanizePaymentMessage(
+              d.message || d.error || d.pay?.message || d.payment?.message || d.pay,
+              "failed",
+            ),
+          );
         }
         return;
       }
       if (d.pending && d.reference) {
         setPendingRef(d.reference);
-        setMsg(d.payment?.message || "Retrait en cours");
+        setMsg(
+          humanizePaymentMessage(
+            d.payment?.message,
+            d.payment?.status || "pending",
+          ),
+        );
         await refresh();
         return;
       }
-      setMsg(d.payment?.message || "Retrait initié");
+      setMsg(
+        humanizePaymentMessage(
+          d.payment?.message,
+          d.payment?.status || "paid",
+        ),
+      );
       await refresh();
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Erreur");
@@ -103,12 +120,8 @@ export default function WalletPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--yk-paper)] px-4 py-10">
-      <div className="mx-auto max-w-2xl">
-        <Link href="/studio" className="text-sm font-bold text-[var(--yk-teal)]">
-          ← Studio
-        </Link>
-        <h1 className="font-display mt-4 text-3xl font-bold text-[var(--yk-forest)]">
+    <div className="max-w-2xl">
+        <h1 className="font-display text-2xl font-bold text-[var(--yk-forest)] sm:text-3xl">
           Portefeuille
         </h1>
         <p className="mt-1 text-sm text-[var(--yk-muted)]">
@@ -184,7 +197,6 @@ export default function WalletPage() {
             </li>
           ))}
         </ul>
-      </div>
     </div>
   );
 }

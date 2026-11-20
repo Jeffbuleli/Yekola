@@ -5,7 +5,8 @@ import { CourseHead } from "@/components/course-card";
 import { getCurrentUser } from "@/lib/auth/session";
 import { enrollmentFor, getCourseBySlug } from "@/lib/db/queries";
 import { BuyCourseButton } from "@/components/buy-course-button";
-import { formatFc } from "@/lib/plans";
+import { PiCheckoutButton } from "@/components/pi-checkout-button";
+import { cdfToPi, formatFc, formatPi } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +63,11 @@ export default async function CoursePage({
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
           <p className="font-display text-3xl font-bold text-[var(--yk-amber)]">
             {formatFc(course.priceCdf)}
+            {course.priceCdf > 0 && (
+              <span className="ml-2 text-lg text-[var(--yk-ink)]">
+                ou {formatPi(cdfToPi(course.priceCdf))}
+              </span>
+            )}
           </p>
           {course.status !== "published" ? (
             <p className="text-sm text-[var(--yk-muted)]">
@@ -78,7 +84,18 @@ export default async function CoursePage({
           ) : user?.role === "admin" ? (
             <p className="text-sm text-[var(--yk-muted)]">Compte admin : pas d’achat.</p>
           ) : user ? (
-            <BuyCourseButton courseId={course.id} priceCdf={course.priceCdf} />
+            <BuyCourseButton
+              courseId={course.id}
+              courseSlug={course.slug}
+              priceCdf={course.priceCdf}
+            />
+            <PiCheckoutButton
+              kind="course_purchase"
+              amountPi={cdfToPi(course.priceCdf)}
+              courseId={course.id}
+              label={`Yekola ${course.title}`}
+              redirectTo={`/learn/${course.id}`}
+            />
           ) : (
             <Link
               href={`/auth/login?next=${encodeURIComponent(`/courses/${slug}`)}`}

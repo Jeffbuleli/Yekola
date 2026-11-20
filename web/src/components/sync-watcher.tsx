@@ -1,10 +1,18 @@
 "use client";
 
 import { useEffect } from "react";
-import { FORCE_KEY, listPending, syncNow } from "@/lib/sync/sync-manager";
+import { useRouter } from "next/navigation";
+import {
+  emitProgressChanged,
+  FORCE_KEY,
+  listPending,
+  syncNow,
+} from "@/lib/sync/sync-manager";
 
 /** Sync auto au montage, au retour réseau, et périodiquement. */
 export function SyncWatcher() {
+  const router = useRouter();
+
   useEffect(() => {
     async function flush() {
       if (typeof localStorage !== "undefined" && localStorage.getItem(FORCE_KEY) === "1") {
@@ -14,7 +22,11 @@ export function SyncWatcher() {
       const p = await listPending();
       if (p.length === 0) return;
       try {
-        await syncNow();
+        const r = await syncNow();
+        if (r.synced > 0) {
+          emitProgressChanged();
+          router.refresh();
+        }
       } catch {
         /* keep pending */
       }
@@ -23,13 +35,13 @@ export function SyncWatcher() {
     void flush();
     window.addEventListener("online", flush);
     window.addEventListener("focus", flush);
-    const timer = setInterval(() => void flush(), 20_000);
+    const timer = setInterval(() => void flush(), 15_000);
 
     return () => {
       window.removeEventListener("online", flush);
       window.removeEventListener("focus", flush);
       clearInterval(timer);
     };
-  }, []);
+  }, [router]);
   return null;
 }

@@ -43,7 +43,7 @@ export default async function LessonPage({
 
   return (
     <div className="min-h-screen bg-[var(--yk-paper)]">
-      <SiteHeader />
+      <SiteHeader variant="app" />
       <LessonViewer
         courseId={courseId}
         lessonId={lessonId}

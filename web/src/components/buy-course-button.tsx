@@ -9,9 +9,11 @@ import { PaymentPendingPanel } from "@/components/payment-pending-panel";
 
 export function BuyCourseButton({
   courseId,
+  courseSlug,
   priceCdf,
 }: {
   courseId: string;
+  courseSlug?: string;
   priceCdf: number;
 }) {
   const router = useRouter();
@@ -31,6 +33,7 @@ export function BuyCourseButton({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           courseId,
+          slug: courseSlug || undefined,
           msisdn: msisdn || undefined,
           momoProvider: momoProvider || undefined,
         }),
@@ -43,6 +46,9 @@ export function BuyCourseButton({
             "failed",
           ),
         );
+        if (data.error === "course_not_found" || data.error === "not_found") {
+          router.refresh();
+        }
         return;
       }
       if (data.pending && data.reference) {

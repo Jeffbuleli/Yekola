@@ -2,13 +2,14 @@
 
 Date: 2026-09-24
 
-## Comptes démo (mot de passe `yekola2026`)
+## Connexion (Sandbox / Pi Next)
 
-| Rôle | Compte | Accès |
-|------|--------|--------|
-| Apprenant | `dan@yekola.demo` | Catalogue, Mes cours, achat |
-| Enseignant | `patty@yekola.demo` | Studio, Tarifs, Catalogue (pas d’achat de ses cours) |
-| Admin | `jeff@yekola.demo` | Modération (valider avant publication) |
+Avec `NEXT_PUBLIC_PI_SANDBOX=1`, **seule la connexion Pioneer** (SDK Pi) est proposée. Pas d’email / mot de passe dans le Sandbox.
+
+| Contexte | Accès |
+|----------|--------|
+| Pioneer (Sandbox) | **Continuer avec Pi** → catalogue, achat cours en Test Pi |
+| Staging local prod | Comptes démo `*@yekola.demo` / `yekola2026` (si sandbox désactivé) |
 
 ## Navigation par rôle
 

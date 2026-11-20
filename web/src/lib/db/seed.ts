@@ -1,15 +1,16 @@
-import { hashPassword, newId } from "@/lib/auth/crypto";
+import { hashPassword } from "@/lib/auth/crypto";
 import type { Academy, Course, DbShape, User } from "@/lib/types";
 
-export const SEED_VERSION = 8;
+export const SEED_VERSION = 9;
 const DEMO_PASSWORD = "yekola2026";
 
 export function buildSeed(): DbShape {
   const now = new Date().toISOString();
-  const adminId = newId("usr");
-  const teacherId = newId("usr");
-  const learnerId = newId("usr");
-  const academyId = newId("acd");
+  // Stable demo IDs — never random (avoids not_found after reseed / hard refresh)
+  const adminId = "usr_demo_admin";
+  const teacherId = "usr_demo_teacher";
+  const learnerId = "usr_demo_learner";
+  const academyId = "acd_demo_patty";
 
   const admin: User = {
     id: adminId,
@@ -24,6 +25,9 @@ export function buildSeed(): DbShape {
     emailVerifyExpiresAt: null,
     passwordResetTokenHash: null,
     passwordResetExpiresAt: null,
+    devicePollTokenHash: null,
+    devicePollExpiresAt: null,
+    devicePollPurpose: null,
   };
 
   const teacher: User = {
@@ -39,6 +43,9 @@ export function buildSeed(): DbShape {
     emailVerifyExpiresAt: null,
     passwordResetTokenHash: null,
     passwordResetExpiresAt: null,
+    devicePollTokenHash: null,
+    devicePollExpiresAt: null,
+    devicePollPurpose: null,
   };
 
   const learner: User = {
@@ -54,6 +61,9 @@ export function buildSeed(): DbShape {
     emailVerifyExpiresAt: null,
     passwordResetTokenHash: null,
     passwordResetExpiresAt: null,
+    devicePollTokenHash: null,
+    devicePollExpiresAt: null,
+    devicePollPurpose: null,
   };
 
   const academy: Academy = {
@@ -71,7 +81,7 @@ export function buildSeed(): DbShape {
   };
 
   const courseWeb: Course = {
-    id: newId("crs"),
+    id: "crs_demo_web",
     academyId,
     slug: "developpeur-web-moderne",
     title: "Développement Web Moderne",
@@ -354,7 +364,7 @@ Pages statiques : Netlify, GitHub Pages, ou hébergeur local. Gardez une copie h
   };
 
   const courseMomo: Course = {
-    id: newId("crs"),
+    id: "crs_demo_momo",
     academyId,
     slug: "mobile-money-pour-commerces",
     title: "Mobile Money pour commerces",
@@ -572,7 +582,7 @@ Volumes par opérateur, frais estimés, incidents. Une demi-page suffit.`,
   };
 
   const courseFp: Course = {
-    id: newId("crs"),
+    id: "crs_demo_elec",
     academyId,
     slug: "electricite-base-apprentis",
     title: "Électricité de base pour apprentis",
@@ -799,7 +809,7 @@ Haute tension, incendie, odeur de brûlé persistante, doute sur le schéma : st
   };
 
   const coursePending: Course = {
-    id: newId("crs"),
+    id: "crs_demo_soudure",
     academyId,
     slug: "soudure-intro-brouillon",
     title: "Soudure - introduction (brouillon)",
@@ -856,7 +866,7 @@ Haute tension, incendie, odeur de brûlé persistante, doute sur le schéma : st
     certificates: [],
     walletTx: [
       {
-        id: newId("wtx"),
+        id: "wtx_demo_seed",
         academyId,
         type: "sale",
         amountCdf: 5000,

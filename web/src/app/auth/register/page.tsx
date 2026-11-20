@@ -8,10 +8,18 @@ import {
   authInputClass,
   authLabelClass,
 } from "@/components/auth-shell";
+import { savePollToken } from "@/lib/auth/poll-login";
+import { PiAuthPanel } from "@/components/pi-auth-panel";
+import { piConnectOnly } from "@/lib/pi/client-env";
 
 function RegisterForm() {
   const router = useRouter();
   const params = useSearchParams();
+
+  function goAfterPi(role: string) {
+    router.push(role === "teacher" ? "/studio" : "/learn");
+    router.refresh();
+  }
   const initialRole = params.get("role") === "teacher" ? "teacher" : "learner";
   const [role, setRole] = useState<"teacher" | "learner">(initialRole);
   const [name, setName] = useState("");
@@ -53,10 +61,12 @@ function RegisterForm() {
         return;
       }
       if (data.pendingVerification) {
+        if (data.pollToken) savePollToken(data.pollToken);
         const q = new URLSearchParams({
           email: data.email || email,
           sent: data.emailSent ? "1" : "0",
         });
+        if (data.pollToken) q.set("poll", data.pollToken);
         router.push(`/auth/check-email?${q}`);
         return;
       }
@@ -72,6 +82,21 @@ function RegisterForm() {
     } finally {
       setBusy(false);
     }
+  }
+
+  if (piConnectOnly()) {
+    return (
+      <AuthShell
+        title="Compte Pioneer"
+        footer={
+          <Link href="/catalog" className="font-bold text-[var(--yk-teal)]">
+            Parcourir le catalogue
+          </Link>
+        }
+      >
+        <PiAuthPanel onSuccess={goAfterPi} />
+      </AuthShell>
+    );
   }
 
   return (

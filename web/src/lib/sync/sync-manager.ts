@@ -261,3 +261,60 @@ export function detectMode(pendingCount: number, forcedOffline?: boolean): Conne
 }
 
 export { FORCE_KEY };
+
+/** Demande au SW de mettre en cache les pages learn du pack (pour ouverture hors ligne). */
+export async function precacheLearnUrls(pack: OfflinePack): Promise<void> {
+  const urls = [
+    "/offline/learn",
+    `/learn/${pack.courseId}`,
+    ...pack.modules.flatMap((m) => [
+      ...m.lessons.map((l) => `/learn/${pack.courseId}/lesson/${l.id}`),
+      ...(m.quiz.length ? [`/learn/${pack.courseId}/quiz/${m.id}`] : []),
+    ]),
+  ];
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+  const reg = await navigator.serviceWorker.ready;
+  reg.active?.postMessage({ type: "CACHE_URLS", urls });
+  // Also warm browser HTTP cache / SW via fetch while online
+  for (const url of urls) {
+    try {
+      await fetch(url, { credentials: "same-origin" });
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
+export async function saveLocalLessonDone(courseId: string, lessonId: string) {
+  const key = `local_done:${courseId}`;
+  const prev = (await getProgress<string[]>(key)) ?? [];
+  if (!prev.includes(lessonId)) await setProgress(key, [...prev, lessonId]);
+}
+
+export async function saveLocalQuizScore(
+  courseId: string,
+  moduleId: string,
+  score: number,
+) {
+  const key = `local_quiz:${courseId}`;
+  const prev = (await getProgress<Record<string, number>>(key)) ?? {};
+  const cur = prev[moduleId];
+  if (cur == null || score > cur) {
+    await setProgress(key, { ...prev, [moduleId]: score });
+  }
+}
+
+export async function getLocalProgress(courseId: string): Promise<{
+  completedLessonIds: string[];
+  quizScores: Record<string, number>;
+}> {
+  const done = (await getProgress<string[]>(`local_done:${courseId}`)) ?? [];
+  const quiz = (await getProgress<Record<string, number>>(`local_quiz:${courseId}`)) ?? {};
+  return { completedLessonIds: done, quizScores: quiz };
+}
+
+export function emitProgressChanged() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("yekola-progress"));
+  }
+}

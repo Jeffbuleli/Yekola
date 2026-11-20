@@ -142,12 +142,8 @@ export default function NewCoursePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--yk-paper)] px-4 py-8 sm:px-6 sm:py-10">
-      <div className="mx-auto max-w-2xl">
-        <Link href="/studio" className="text-sm font-bold text-[var(--yk-teal)]">
-          ← Studio
-        </Link>
-        <form onSubmit={onSubmit} className="mt-4 space-y-6">
+    <div className="max-w-2xl">
+<form onSubmit={onSubmit} className="space-y-6">
           <section className="yk-card space-y-4">
             <h1 className="font-display text-2xl font-bold text-[var(--yk-forest)]">
               Nouveau cours
@@ -399,6 +395,5 @@ export default function NewCoursePage() {
           </button>
         </form>
       </div>
-    </div>
   );
 }
